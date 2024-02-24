@@ -1,0 +1,6 @@
+pandas
+path
+more-itertools
+typer
+black
+autoflake
