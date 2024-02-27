@@ -1,4 +1,5 @@
 from typing import Optional
+import numpy as np
 from rlrs.datasets.movielens import MovieLens
 
 
@@ -11,5 +12,24 @@ class MovieLenOfflineEnv:
             lambda x: x > state_size)
 
         self.reset()
+        self.done_count = 3000
 
-    def reset(self): ...
+    def reset(self):
+        """
+        Reset the env.
+        Recommended items : rated (>=4) movies.
+        """
+        self.user = self.user_id or np.random.choice(self.avail_users)
+
+        ratings = self.db.get_ratings(self.user)
+
+        self.user_ratings = {
+            r.MovieID: r.Rating for r in ratings.itertuples(index=False)
+        }
+        self.ratings_in_state = ratings[: self.state_size]["MovieID"]
+        self.done = None
+
+    def get_item_names(self, item_ids):
+        # should call db
+        ...
+

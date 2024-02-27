@@ -29,6 +29,9 @@ class MovieLens:
     def filter_users_by_num_ratings(self, key: Callable):
         return self.freq.index[self.freq["MovieID"].apply(key)].tolist()
 
+    def get_ratings(self, user):
+        ...
+
     @classmethod
     def from_folder(cls, src: Path):
         return cls(
