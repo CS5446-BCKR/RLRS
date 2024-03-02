@@ -36,7 +36,7 @@ class Actor:
         self.step_size = step_size
         # hard code optimizer here
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.schedular = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
 
     def update_target(self):
         """
