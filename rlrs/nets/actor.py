@@ -1,5 +1,9 @@
+"""
+TODO (02/03/24): save and load networks
+"""
 from torch import nn
 from torch.optim import lr_scheduler, Adam
+from utils import soft_replace_update
 
 
 class ActorModel(nn.Module):
@@ -34,7 +38,12 @@ class Actor:
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
         self.schedular = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
 
-    def update_target(self): ...
+    def update_target(self):
+        """
+        Soft update
+        Ref: https://github.com/navneet-nmk/pytorch-rl/blob/8329234822dcb977931c72db691eabf5b635788c/models/DDPG.py#L176
+        """
+        soft_replace_update(self.target, self.online_network, self.tau)
 
     def fit_online_network(self, states, gradients):
         """
