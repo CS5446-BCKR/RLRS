@@ -20,4 +20,3 @@ class DRRAve(nn.Module):
         history = self.avg(items)
         interaction = user * history 
         return torch.cat((user, interaction, history), -1)
-

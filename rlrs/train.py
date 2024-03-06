@@ -1,5 +1,9 @@
-from rlrs.envs.movielens_env import MovieLenOfflineEnv
+from omegaconf import DictConfig
 
 
-def train_recommender(cfg):
-    ...
+class RecommenderTrainer:
+    def __init__(self, rec, cfg: DictConfig):
+        self.rec = rec
+
+    def train(self):
+        ...
