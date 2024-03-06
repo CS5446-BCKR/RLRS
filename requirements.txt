@@ -5,3 +5,4 @@ typer
 black
 autoflake
 visidata
+omegaconf
