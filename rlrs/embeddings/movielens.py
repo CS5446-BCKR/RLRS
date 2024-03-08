@@ -1,10 +1,13 @@
-class MovieEmbedding:
+from .base import EmbeddingBase
+
+
+class MovieEmbedding(EmbeddingBase):
     def __init__(self): ...
 
     def fit(self, data): ...
 
 
-class MovieUserEmbedding:
+class MovieUserEmbedding(EmbeddingBase):
     def __init__(self): ...
 
     def fit(self, data): ...
