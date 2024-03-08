@@ -1,0 +1,13 @@
+class MovieEmbedding:
+    def __init__(self):
+        ...
+
+    def fit(self, data):
+        ...
+
+class MovieUserEmbedding:
+    def __init__(self):
+        ...
+
+    def fit(self, data):
+        ...
