@@ -10,6 +10,7 @@ class DRRAve(nn.Module):
     def __init__(self, input_dim):
         self.input_dim = input_dim
         self.avg = nn.AdaptiveAvgPool1d(1)
+        self.output_dim = 3 * input_dim
 
     def forward(self, inputs):
         """

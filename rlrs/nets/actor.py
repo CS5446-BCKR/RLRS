@@ -30,10 +30,13 @@ class ActorModel(nn.Module):
 
 
 class Actor:
-    def __init__(self, input_dim, hidden_dim, output_dim, tau, lr, step_size):
+    def __init__(
+        self, input_dim, hidden_dim, output_dim, state_size, tau, lr, step_size
+    ):
         self.online_network = ActorModel(input_dim, hidden_dim, output_dim)
         self.target = ActorModel(input_dim, hidden_dim, output_dim)
         self.tau = tau
+        self.state_size = state_size
         self.lr = lr
         self.step_size = step_size
         # hard code optimizer here
