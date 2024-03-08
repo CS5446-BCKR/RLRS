@@ -4,9 +4,10 @@ TODO:
 - Add users size sampling
 """
 
+from typing import Callable
+
 import pandas as pd
 from path import Path
-from typing import Callable
 
 
 class MovieLens:
@@ -29,8 +30,7 @@ class MovieLens:
     def filter_users_by_num_ratings(self, key: Callable):
         return self.freq.index[self.freq["MovieID"].apply(key)].tolist()
 
-    def get_ratings(self, user):
-        ...
+    def get_ratings(self, user): ...
 
     @classmethod
     def from_folder(cls, src: Path):

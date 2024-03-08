@@ -1,6 +1,5 @@
 import numpy as np
 
-
 SENTIAL_REWARD_VALUE = 999
 
 
@@ -41,5 +40,5 @@ class ReplayMemory:
             self.actions[batch_indexes],
             self.rewards[batch_indexes],
             self.next_states[batch_indexes],
-            self.dones[batch_indexes]
+            self.dones[batch_indexes],
         )

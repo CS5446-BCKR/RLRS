@@ -1,10 +1,12 @@
-from torch import nn
 import torch
+from torch import nn
+
 
 class DRRAve(nn.Module):
     """
     The DRR-ave component in the paper.
     """
+
     def __init__(self, input_dim):
         self.input_dim = input_dim
         self.avg = nn.AdaptiveAvgPool1d(1)
@@ -18,5 +20,5 @@ class DRRAve(nn.Module):
         user, items = inputs
         # TODO: should to some transformation here
         history = self.avg(items)
-        interaction = user * history 
+        interaction = user * history
         return torch.cat((user, interaction, history), -1)

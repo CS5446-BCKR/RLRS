@@ -1,7 +1,8 @@
 from typing import List
+
 import pandas as pd
-from path import Path
 import typer
+from path import Path
 
 COL_NAMES = {
     "movies.dat": ["MovieID", "Title", "Genres"],
@@ -17,7 +18,7 @@ def prepare_file(src_file: Path, col_names: List[str], dst_file: Path):
         header=None,
         names=col_names,
         encoding="latin-1",
-        engine="python"
+        engine="python",
     )
     df.to_csv(dst_file, index=False)
 

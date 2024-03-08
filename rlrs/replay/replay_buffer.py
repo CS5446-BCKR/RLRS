@@ -1,6 +1,7 @@
-import numpy as np
-from trees import SumTree, MinTree
 import random
+
+import numpy as np
+from trees import MinTree, SumTree
 
 
 class PriorityExperienceReplay:

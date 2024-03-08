@@ -1,9 +1,10 @@
-from path import Path
-from omegaconf import OmegaConf, DictConfig
-from rlrs.movie_recommender import MovieRecommender
-from rlrs.foodorder_recommender import FoodOrderRecommender
-from rlrs.train import RecommenderTrainer
 import typer
+from omegaconf import DictConfig, OmegaConf
+from path import Path
+
+from rlrs.foodorder_recommender import FoodOrderRecommender
+from rlrs.movie_recommender import MovieRecommender
+from rlrs.train import RecommenderTrainer
 
 
 def load_recommender(config: DictConfig):
@@ -18,9 +19,11 @@ def load_recommender(config: DictConfig):
 def main(
     config_path: Path = typer.Argument(
         ...,
-        exists=True, file_okay=True, readable=True,
+        exists=True,
+        file_okay=True,
+        readable=True,
         help="Path to config file",
-        path_type=Path
+        path_type=Path,
     )
 ):
     config = OmegaConf.load(config_path)

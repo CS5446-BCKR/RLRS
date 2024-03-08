@@ -2,13 +2,24 @@
 Critic basically is a Deep-Q network
 Estimate the Q-value given a state (from env + state network) and an action (from actor)
 """
+
+import torch
 from torch import nn
-from torch.optim import Adam, lr_scheduler
 from torch.autograd import grad
+from torch.optim import Adam, lr_scheduler
 from utils import soft_replace_update
 
+
 class CriticNetwork(nn.Module):
-    def __init__(self, input_action_dim, input_state_dim, embedding_dim, hidden_dim, output_dim):
+    def __init__(
+        self,
+        input_action_dim,
+        input_state_dim,
+        embedding_dim,
+        hidden_dim,
+        output_dim,
+        tau,
+    ):
         self.input_action_dim = input_action_dim
         self.input_state_dim = input_state_dim
         self.embedding_dim = embedding_dim
@@ -17,19 +28,17 @@ class CriticNetwork(nn.Module):
         self.tau = tau
 
         self.action_fc = nn.Sequential(
-            [
-                nn.Linear(input_action_dim, embedding_dim),
-                nn.ReLU()
-            ]
+            [nn.Linear(input_action_dim, embedding_dim), nn.ReLU()]
         )
 
         self.layers = nn.Sequential(
             [
-                nn.Linear(self.embedding_dim + self.input_state_dim, hidden_dim),
+                nn.Linear(self.embedding_dim +
+                          self.input_state_dim, hidden_dim),
                 nn.ReLU(),
                 nn.Linear(self.hidden_dim, self.hidden_dim),
                 nn.ReLU(),
-                nn.Linear(self.hidden_dim, 1)
+                nn.Linear(self.hidden_dim, 1),
             ]
         )
 
@@ -47,15 +56,29 @@ class CriticNetwork(nn.Module):
 
 
 class Critic:
-    def __init__(self, input_action_dim, input_state_dim, embedding_dim, hidden_dim, tau, step_size):
-        self.online_network = Critic(input_action_dim, input_state_dim, embedding_dim, hidden_dim)
-        self.target = Critic(input_action_dim, input_state_dim, embedding_dim, hidden_dim)
+    def __init__(
+        self,
+        input_action_dim,
+        input_state_dim,
+        embedding_dim,
+        hidden_dim,
+        tau,
+        step_size,
+        lr,
+    ):
+        self.online_network = Critic(
+            input_action_dim, input_state_dim, embedding_dim, hidden_dim
+        )
+        self.target = Critic(
+            input_action_dim, input_state_dim, embedding_dim, hidden_dim
+        )
         self.tau = tau
         self.lr = lr
         self.step_size = step_size
 
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(
+            self.optim, step_size=self.step_size)
 
     def update_target(self):
         soft_replace_update(self.target, self.online_network, self.tau)

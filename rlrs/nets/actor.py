@@ -1,8 +1,9 @@
 """
 TODO (02/03/24): save and load networks
 """
+
 from torch import nn
-from torch.optim import lr_scheduler, Adam
+from torch.optim import Adam, lr_scheduler
 from utils import soft_replace_update
 
 
@@ -11,6 +12,7 @@ class ActorModel(nn.Module):
     Actor Model, or the policy network creates *actions* (not real action through),
     it needs to multiply with item embeddings to get the ranked score for recommended items.
     """
+
     def __init__(self, input_dim: int, hidden_dim: int, output_dim: int):
         super(ActorModel, self).__init__()
         self.layers = [
@@ -36,7 +38,8 @@ class Actor:
         self.step_size = step_size
         # hard code optimizer here
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(
+            self.optim, step_size=self.step_size)
 
     def update_target(self):
         """
