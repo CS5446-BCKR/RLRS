@@ -37,6 +37,9 @@ class MovieRecommender:
         self.eps_priority = cfg["eps_priority"]
         self.eps = cfg["eps"]
 
+        # -- Other training setting
+        self.M = cfg["M"]
+
         # -- Setup data
         self.num_users = self.env.num_users()
         self.user_embeddings = DummyEmbedding(self.dim)
@@ -85,9 +88,10 @@ class MovieRecommender:
         # 1. Get embeddings of historical positive embs
         positive_item_indexes = self.env.get_positive_items(user_idx)
         positive_embs = self.item_embeddings[positive_item_indexes]
+        user_emb = self.user_embeddings[user_idx]
 
         # 2. Get state
-        state = self.drr_ave(positive_embs)
+        state = self.drr_ave((user_emb, positive_embs))
         # feed to Actor to generate the action scores
         action = self.actor(state)
 
@@ -96,4 +100,10 @@ class MovieRecommender:
         scores = torch.mm(self.user_embeddings.embeddings, action)
         return torch.argsort(scores, descending=True)
 
-    def train(self): ...
+    def train(self):
+        # 1. Initialize networks
+        self.actor.initialize()
+        self.critic.initialize()
+
+        for session_id in range(self.M):
+            ...

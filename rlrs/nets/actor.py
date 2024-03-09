@@ -51,6 +51,9 @@ class Actor:
         """
         soft_replace_update(self.target, self.online_network, self.tau)
 
+    def initialize(self):
+        ...
+
     def fit_online_network(self, states, gradients):
         """
         Fit the source network via states and gradients
