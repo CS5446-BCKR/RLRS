@@ -34,3 +34,11 @@ class MovieLenOfflineEnv:
     def get_item_names(self, item_ids):
         # should call db
         ...
+
+    @property
+    def num_users(self):
+        return self.db.num_users
+
+    @property
+    def num_items(self):
+        return self.db.num_items

@@ -5,8 +5,10 @@ TODO:
  - Move training code to other place. 
 """
 
+import torch
 from omegaconf import DictConfig
 
+from rlrs.embeddings.base import DummyEmbedding
 from rlrs.nets.actor import Actor
 from rlrs.nets.critic import Critic
 from rlrs.nets.state_module import DRRAve
@@ -34,6 +36,12 @@ class MovieRecommender:
 
         self.eps_priority = cfg["eps_priority"]
         self.eps = cfg["eps"]
+
+        # -- Setup data
+        self.num_users = self.env.num_users()
+        self.user_embeddings = DummyEmbedding(self.dim)
+        self.num_items = self.env.num_items()
+        self.item_embeddings = DummyEmbedding(self.dim)
 
         # -- Setup components
 
@@ -67,10 +75,25 @@ class MovieRecommender:
         )
 
         self.buffer = PriorityExperienceReplay(
-            self.replay_memory_size, self.dim
-        )
+            self.replay_memory_size, self.dim)
 
+    def recommend(self, user_idx):
+        """
+        Get *action* from the actor, multiply with the historical positive embeddings.
+        Recommended items are those with the highest scores.
+        """
+        # 1. Get embeddings of historical positive embs
+        positive_item_indexes = self.env.get_positive_items(user_idx)
+        positive_embs = self.item_embeddings[positive_item_indexes]
 
-    def recommend(self, user_idx): ...
+        # 2. Get state
+        state = self.drr_ave(positive_embs)
+        # feed to Actor to generate the action scores
+        action = self.actor(state)
+
+        # TODO: make it more flexible
+        # Nx D * Dx1
+        scores = torch.mm(self.user_embeddings.embeddings, action)
+        return torch.argsort(scores, descending=True)
 
     def train(self): ...
