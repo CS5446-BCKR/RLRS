@@ -83,6 +83,9 @@ class Critic:
     def update_target(self):
         soft_replace_update(self.target, self.online_network, self.tau)
 
+    def initialize(self):
+        ...
+
     def fit_online_network(self, actions, states):
         self.online_network.train()
         self.optim.zero_grad()
