@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pandas as pd
+import torch
 
 
 class EmbeddingBase(ABC):
@@ -19,9 +21,22 @@ class DummyEmbedding(EmbeddingBase):
         self.embeddings = None
 
     def fit(self, data):
+        """
+        Argument:
+            data: DataFrame with index
+        """
         N = data.shape[0]
-        self.embeddings = np.random.rand(N, self.dim)
+        embeddings = torch.rand((N, self.dim))
+        self.embs = pd.DataFrame(index=data.index)
+        self.embs["emb"] = embeddings
 
     def __getitem__(self, index):
         assert self.embeddings is not None
-        return self.embeddings[index]
+        embs = self.embs.loc[index].values
+        if len(embs.shape) == 0:
+            return embs.item()
+        return np.stack(embs.squeeze())
+
+    @property
+    def all(self):
+        return self.embs['emb'].values
