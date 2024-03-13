@@ -29,10 +29,11 @@ class ActorModel(nn.Module):
         return self.layers(inputs)
 
 
-class Actor:
+class Actor(nn.Module):
     def __init__(
         self, input_dim, hidden_dim, output_dim, state_size, tau, lr, step_size
     ):
+        super(Actor, self).__init__()
         self.online_network = ActorModel(input_dim, hidden_dim, output_dim)
         self.target = ActorModel(input_dim, hidden_dim, output_dim)
         self.tau = tau
@@ -52,7 +53,7 @@ class Actor:
         soft_replace_update(self.target, self.online_network, self.tau)
 
     def initialize(self):
-        ...
+        raise NotImplementedError()
 
     def fit_online_network(self, states, gradients):
         """
@@ -63,3 +64,12 @@ class Actor:
         outputs = self.online_network(states)
         outputs.backward(gradients)
         self.scheduler.step()
+
+    def forward(self, inputs):
+        return self.online_network(inputs)
+
+    def target_forward(self, inputs):
+        return self.target(inputs)
+
+    def train(self, inputs, state_grads):
+        raise NotImplementedError()

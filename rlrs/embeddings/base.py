@@ -1,6 +1,9 @@
+"""
+TODO: Return Torch tensor
+"""
+
 from abc import ABC, abstractmethod
 
-import numpy as np
 import pandas as pd
 import torch
 
@@ -8,6 +11,9 @@ import torch
 class EmbeddingBase(ABC):
     @abstractmethod
     def fit(self, data): ...
+
+    @abstractmethod
+    def __getitem__(self, index) -> torch.Tensor: ...
 
 
 class DummyEmbedding(EmbeddingBase):
@@ -25,18 +31,19 @@ class DummyEmbedding(EmbeddingBase):
         Argument:
             data: DataFrame with index
         """
-        N = data.shape[0]
-        embeddings = torch.rand((N, self.dim))
         self.embs = pd.DataFrame(index=data.index)
-        self.embs["emb"] = embeddings
+        self.embs["emb"] = self.embs.index.map(lambda i: torch.randn(self.dim))
 
-    def __getitem__(self, index):
-        assert self.embeddings is not None
+    def __getitem__(self, index) -> torch.Tensor:
+        assert self.embs is not None
         embs = self.embs.loc[index].values
-        if len(embs.shape) == 0:
-            return embs.item()
-        return np.stack(embs.squeeze())
+        if isinstance(embs, torch.Tensor):
+            return embs
+        return torch.stack(embs.tolist())
 
     @property
     def all(self):
-        return self.embs['emb'].values
+        """
+        Not efficient here
+        """
+        return torch.stack(self.embs["emb"].values.tolist())

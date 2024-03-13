@@ -1,7 +1,16 @@
+"""
+TODO: switch to pytorch tensor
+"""
 import random
+from collections import namedtuple
 
 import numpy as np
 from trees import MinTree, SumTree
+
+BatchBufferPayload = namedtuple(
+    "BatchBufferPayload",
+    ["states", "actions", "rewards", "next_states", "dones", "weights", "indexes"],
+)
 
 
 class PriorityExperienceReplay:
@@ -28,6 +37,9 @@ class PriorityExperienceReplay:
         self.beta = 0.4
         self.beta_constant = 1e-5
 
+    def empty(self):
+        return self.crt_idx <= 1 and not self.buffer.is_full
+
     def append(self, state, action, reward, next_state, done):
         self.states[self.crt_idx] = state
         self.actions[self.crt_idx] = action
@@ -50,7 +62,7 @@ class PriorityExperienceReplay:
     def update_max_priority(self, priority):
         self.max_priority = max(self.max_priority, priority)
 
-    def sample(self, batch_size):
+    def sample(self, batch_size) -> BatchBufferPayload:
         rd_idx = []
         weight_batch = []
         index_batch = []
@@ -78,7 +90,7 @@ class PriorityExperienceReplay:
 
         self.beta = min(1.0, self.beta + self.beta_constant)
 
-        return (
+        return BatchBufferPayload(
             self.states[rd_idx],
             self.actions[rd_idx],
             self.rewards[rd_idx],

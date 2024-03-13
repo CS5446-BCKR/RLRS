@@ -27,4 +27,4 @@ std: 0.001
 tau: 0.001
 batch_size: 32
 M: 100
-
+workspace: workspace/test_0

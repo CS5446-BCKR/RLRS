@@ -109,6 +109,90 @@ class MovieRecommender:
         scores = torch.mm(self.item_embeddings.all, action)
         return torch.argsort(scores, descending=True)
 
+    def train_on_session(self):
+        # 3. (Line 5) observe the initial state
+        user_id, prev_items, done = self.env.reset()
+        while not done:  # Line 6
+            user_emb = self.user_embeddings[user_id]
+            items_emb = self.item_embeddings[prev_items]
+
+            # Line 7: Find the state via DRR
+            user_emb = torch.from_numpy(user_emb)
+            items_emb = torch.from_numpy(items_emb)
+            drr_inputs = (user_emb, items_emb)
+            state = self.drr_ave(drr_inputs)
+
+            # Line 8: Find the action based on the curernt policy
+            action = self.actor(state)
+            action = action.numpy()
+            # and apply epsilon-greedy exploration
+            if self.eps > np.random.uniform():
+                self.eps -= self.eps_decay
+                action += np.random.normal(0, self.std, size=action.shape)
+
+            # Line 9: Recommend the new item
+            recommended_item = self.recommend(user_id, action)
+
+            # Line 10: Calculate the reward and the next state
+            next_user_state = self.env.step(recommended_item)
+            reward = next_user_state.reward
+
+            # Line 11 Get representation of the next state
+            next_item_embs = self.item_embeddings[next_user_state.prev_pos_items]
+            next_item_embs = torch.from_numpy(next_item_embs)
+            next_state_inputs = (user_emb, next_item_embs)
+            next_state = self.drr_ave(next_state_inputs)
+
+            # Line 12: Update the buffer
+            self.buffer.append(state, action, reward, next_state, done)
+
+            # Line 13: Sample a minibatch of N transitions
+            # with **prioritized experience replay sampling**
+            # Paper: https://arxiv.org/pdf/1511.05952.pdf)
+            # Algorithm 1
+            if not self.buffer.empty():
+                buffer_payload = self.buffer.sample(self.batch_size)
+
+                Q = calc_Q(
+                    self.critic,
+                    buffer_payload.actions,
+                    buffer_payload.next_states,
+                    is_target=False,
+                )
+
+                Q_target = calc_Q(
+                    self.critic,
+                    buffer_payload.actions,
+                    buffer_payload.next_states,
+                    is_target=True,
+                )
+
+                # Clipped Double Q-learn
+                Q_min = torch.min(torch.hstack((Q, Q_target)), dim=0)[0]
+
+                TD_err = calc_TD_error(
+                    buffer_payload.rewards,
+                    Q_min,
+                    buffer_payload.dones,
+                    self.discount_factor,
+                )
+
+                # Update the buffer
+                for p, i in zip(TD_err, buffer_payload.indexes):
+                    self.buffer.update_priority(abs(p) + self.eps_priority, i)
+
+                # train critic
+                critic_inputs = (buffer_payload.actions, buffer_payload.states)
+                self.critic.train(critic_inputs, TD_err,
+                                  buffer_payload.weights)
+
+                state_grads = self.critic.dq_da(critic_inputs)
+                # train actor
+                self.actor.train(buffer_payload.states, state_grads)
+                # soft update strategy
+                self.critic.update_target()
+                self.actor.update_target()
+
     def train(self):
         # 1. Initialize networks
         # Line 1-2
@@ -119,31 +203,20 @@ class MovieRecommender:
             self.replay_memory_size, self.dim)
 
         for session_id in range(self.M):
-            # 3. (Line 5) observe the initial state
-            user_id, prev_items, done = self.env.reset()
-            while not done:  # Line 6
-                user_emb = self.user_embeddings[user_id]
-                items_emb = self.item_embeddings[prev_items]
+            self.train_on_session()
 
-                # Line 7: Find the state via DRR
-                user_emb = torch.from_numpy(user_emb)
-                items_emb = torch.from_numpy(items_emb)
-                drr_inputs = (user_emb, items_emb)
-                state = self.drr_ave(drr_inputs)
 
-                # Line 8: Find the action based on the curernt policy
-                action = self.actor(state)
-                action = action.numpy()
-                # and apply epsilon-greedy exploration
-                if self.eps > np.random.uniform():
-                    self.eps -= self.eps_decay
-                    action += np.random.normal(0, self.std, size=action.shape)
+# Line 11 In PER paper
+def calc_TD_error(reward, Q, dones, discount_factor):
+    Q_target = np.zeros_like(Q)
+    Q_target = reward + (1.0 - dones) * (discount_factor * Q)
+    return Q_target
 
-                # Line 9: Recommend the new item
-                recommended_item = self.recommend(user_id, action)
 
-                # Line 10: Calculate the reward
-                user_state = self.env.step(recommended_item)
-
-                # Line 11: Get the state of the next step
-                ...
+def calc_Q(network: Critic, action, state, is_target=False):
+    action = torch.from_numpy(action)
+    state = torch.from_numpy(state)
+    inputs = (action, state)
+    if is_target:
+        return network.target_forward(inputs)
+    return network.forward(inputs)

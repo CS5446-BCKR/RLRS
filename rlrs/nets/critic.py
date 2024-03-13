@@ -20,6 +20,7 @@ class CriticNetwork(nn.Module):
         output_dim,
         tau,
     ):
+        super(CriticNetwork, self).__init_()
         self.input_action_dim = input_action_dim
         self.input_state_dim = input_state_dim
         self.embedding_dim = embedding_dim
@@ -55,7 +56,7 @@ class CriticNetwork(nn.Module):
         return qvalue
 
 
-class Critic:
+class Critic(nn.Module):
     def __init__(
         self,
         input_action_dim,
@@ -66,6 +67,7 @@ class Critic:
         step_size,
         lr,
     ):
+        super(Critic, self).__init__()
         self.online_network = Critic(
             input_action_dim, input_state_dim, embedding_dim, hidden_dim
         )
@@ -84,7 +86,7 @@ class Critic:
         soft_replace_update(self.target, self.online_network, self.tau)
 
     def initialize(self):
-        ...
+        raise NotImplementedError()
 
     def fit_online_network(self, actions, states):
         self.online_network.train()
@@ -99,3 +101,12 @@ class Critic:
         grad_action = grad(
             outputs, action, grad_outputs=torch.ones_like(outputs))
         return grad_action
+
+    def train(self, inputs, y, weights):
+        raise NotImplementedError()
+
+    def forward(self, inputs):
+        return self.online_network(inputs)
+
+    def target_forward(self, inputs):
+        return self.target(inputs)
