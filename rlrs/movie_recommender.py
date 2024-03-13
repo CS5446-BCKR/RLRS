@@ -8,6 +8,7 @@ TODO:
 import numpy as np
 import torch
 from omegaconf import DictConfig
+from path import Path
 
 from rlrs.embeddings.base import DummyEmbedding
 from rlrs.envs.movielens_env import MovieLenOfflineEnv
@@ -43,6 +44,7 @@ class MovieRecommender:
 
         # -- Other training setting
         self.M = cfg["M"]
+        self.workspace = Path(cfg["workspace"])
 
         # -- Setup data
         self.users = self.env.users()
@@ -109,7 +111,8 @@ class MovieRecommender:
         scores = torch.mm(self.item_embeddings.all, action)
         return torch.argsort(scores, descending=True)
 
-    def train_on_session(self):
+    def train_on_episode(self):
+        episode_reward = 0
         # 3. (Line 5) observe the initial state
         user_id, prev_items, done = self.env.reset()
         while not done:  # Line 6
@@ -151,19 +154,19 @@ class MovieRecommender:
             # Paper: https://arxiv.org/pdf/1511.05952.pdf)
             # Algorithm 1
             if not self.buffer.empty():
-                buffer_payload = self.buffer.sample(self.batch_size)
+                payload = self.buffer.sample(self.batch_size)
 
                 Q = calc_Q(
                     self.critic,
-                    buffer_payload.actions,
-                    buffer_payload.next_states,
+                    payload.actions,
+                    payload.next_states,
                     is_target=False,
                 )
 
                 Q_target = calc_Q(
                     self.critic,
-                    buffer_payload.actions,
-                    buffer_payload.next_states,
+                    payload.actions,
+                    payload.next_states,
                     is_target=True,
                 )
 
@@ -171,27 +174,31 @@ class MovieRecommender:
                 Q_min = torch.min(torch.hstack((Q, Q_target)), dim=0)[0]
 
                 TD_err = calc_TD_error(
-                    buffer_payload.rewards,
+                    payload.rewards,
                     Q_min,
-                    buffer_payload.dones,
+                    payload.dones,
                     self.discount_factor,
                 )
 
                 # Update the buffer
-                for p, i in zip(TD_err, buffer_payload.indexes):
+                for p, i in zip(TD_err, payload.indexes):
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
 
                 # train critic
-                critic_inputs = (buffer_payload.actions, buffer_payload.states)
-                self.critic.train(critic_inputs, TD_err,
-                                  buffer_payload.weights)
+                critic_inputs = (payload.actions, payload.states)
+                self.critic.train(critic_inputs, TD_err, payload.weights)
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
-                self.actor.train(buffer_payload.states, state_grads)
+                self.actor.train(payload.states, state_grads)
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()
+
+            # move to the next state
+            prev_items = next_user_state.prev_pos_items
+            episode_reward += next_user_state.reward
+        return episode_reward
 
     def train(self):
         # 1. Initialize networks
@@ -202,8 +209,15 @@ class MovieRecommender:
         self.buffer = PriorityExperienceReplay(
             self.replay_memory_size, self.dim)
 
-        for session_id in range(self.M):
-            self.train_on_session()
+        for episode in range(self.M):
+            episode_reward = self.train_on_episode()
+            print(f"Episode reward: {episode_reward}")
+
+            # saving model
+            self.save()
+
+    def save(self):
+        raise NotImplementedError()
 
 
 # Line 11 In PER paper
@@ -214,8 +228,6 @@ def calc_TD_error(reward, Q, dones, discount_factor):
 
 
 def calc_Q(network: Critic, action, state, is_target=False):
-    action = torch.from_numpy(action)
-    state = torch.from_numpy(state)
     inputs = (action, state)
     if is_target:
         return network.target_forward(inputs)
