@@ -53,17 +53,8 @@ class Actor(nn.Module):
         soft_replace_update(self.target, self.online_network, self.tau)
 
     def initialize(self):
-        raise NotImplementedError()
-
-    def fit_online_network(self, states, gradients):
-        """
-        Fit the source network via states and gradients
-        """
-        self.online_network.train()
-        self.optim.zero_grad()
-        outputs = self.online_network(states)
-        outputs.backward(gradients)
-        self.scheduler.step()
+        # copy weights from online to target
+        soft_replace_update(self.target, self.online_network, 1.0)
 
     def forward(self, inputs):
         return self.online_network(inputs)
@@ -71,5 +62,10 @@ class Actor(nn.Module):
     def target_forward(self, inputs):
         return self.target(inputs)
 
-    def train(self, inputs, state_grads):
-        raise NotImplementedError()
+    def fit(self, inputs, state_grads):
+        self.online_network.train()
+        self.optim.zero_grad()
+        outputs = self.online_network(inputs)
+        outputs.backward(-state_grads)
+        self.optim.step()
+        self.scheduler.step()

@@ -186,11 +186,11 @@ class MovieRecommender:
 
                 # train critic
                 critic_inputs = (payload.actions, payload.states)
-                self.critic.train(critic_inputs, TD_err, payload.weights)
+                self.critic.fit(critic_inputs, TD_err, payload.weights)
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
-                self.actor.train(payload.states, state_grads)
+                self.actor.fit(payload.states, state_grads)
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()

@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from torch.autograd import grad
 from torch.optim import Adam, lr_scheduler
-from utils import soft_replace_update
+from utils import soft_replace_update, weighted_mse_loss
 
 
 class CriticNetwork(nn.Module):
@@ -86,11 +86,17 @@ class Critic(nn.Module):
         soft_replace_update(self.target, self.online_network, self.tau)
 
     def initialize(self):
-        raise NotImplementedError()
+        soft_replace_update(self.target, self.online_network, 1.0)
 
-    def fit_online_network(self, actions, states):
+    def fit(self, inputs, y, weights):
         self.online_network.train()
         self.optim.zero_grad()
+        self.optim.zero_grad()
+        outputs = self.online_network(inputs)
+        loss = weighted_mse_loss(outputs, y, weights)
+        loss.backward()
+        self.optim.step()
+        self.scheduler.step()
 
     def dq_da(self, inputs):
         """
@@ -101,9 +107,6 @@ class Critic(nn.Module):
         grad_action = grad(
             outputs, action, grad_outputs=torch.ones_like(outputs))
         return grad_action
-
-    def train(self, inputs, y, weights):
-        raise NotImplementedError()
 
     def forward(self, inputs):
         return self.online_network(inputs)

@@ -1,5 +1,6 @@
 
 input_data: data/ml-1m-csv
+device: cpu
 
 # Env settings
 state_size: 5
