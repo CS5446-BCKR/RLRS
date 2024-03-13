@@ -33,6 +33,9 @@ class MovieLens:
     def get_ratings(self, user):
         return self.ratings[self.ratings.UserID == user]
 
+    def get_positive_items(self, user, thres):
+        raise NotImplementedError()
+
     @classmethod
     def from_folder(cls, src: Path):
         return cls(

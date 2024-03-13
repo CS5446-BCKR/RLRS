@@ -12,9 +12,10 @@ UserStateInfo = namedtuple(
 class MovieLenOfflineEnv:
     """ """
 
-    def __init__(self, db: MovieLens, state_size: int, user_id: Optional[int] = None):
+    def __init__(self, db: MovieLens, state_size: int, rating_threshold: int, user_id: Optional[int] = None):
         self.db = db
         self.state_size = state_size
+        self.rating_threshild = rating_threshold
         self.user_id = user_id
         self.avail_users = self.db.filter_user_by_history(
             lambda x: x > state_size)
@@ -62,13 +63,15 @@ class MovieLenOfflineEnv:
                  3. Whether we go through the whole session (`done`) .
                  4. Reward value
         """
-        ...
+        raise NotImplementedError()
 
     def get_item_names(self, item_ids):
         # should call db
-        ...
+        raise NotImplementedError()
 
-    def get_positive_items(self, user_idx): ...
+    def get_positive_items(self, user_idx):
+        """ Return the item ids of positive items """
+        return self.db.get_positive_items(user_idx, self.rating_threshild)
 
     @property
     def num_users(self):
@@ -82,10 +85,10 @@ class MovieLenOfflineEnv:
         """
         Return all users in the env
         """
-        ...
+        return self.avail_users
 
     def items(self):
         """
         Return all items in the env
         """
-        ...
+        return self.db.items
