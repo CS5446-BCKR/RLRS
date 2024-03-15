@@ -49,6 +49,15 @@ class DummyEmbedding(EmbeddingBase):
         """
         return torch.stack(self.embs["emb"].values.tolist())
 
+class SVD(object):
+    def __init__(self, dim):
+        self.dim = dim
+        self.user_matrix = None
+        self.item_matrix = None
+
+    def fit(self, data):
+        self.user_matrix, V , self.item_matrix = np.linalg.svd(data)
+
 
 
 class PMF(object):
@@ -160,8 +169,11 @@ class PMF(object):
                     if batch == self.num_batches - 1:
                         print('Training RMSE: %f, Test RMSE %f' % (self.rmse_train[-1], self.rmse_test[-1]))
 
+    
+    
     def predict(self, invID):
         return np.dot(self.w_Item, self.w_User[int(invID), :]) + self.mean_inv 
+
 
     # ****************Set parameters by providing a parameter dictionary.  ***********#
     def set_params(self, parameters):
