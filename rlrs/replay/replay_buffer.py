@@ -1,6 +1,7 @@
 """
 TODO: switch to pytorch tensor
 """
+
 import random
 from collections import namedtuple
 
@@ -21,12 +22,10 @@ class PriorityExperienceReplay:
         self.is_full = False
 
         # setup buffers
-        self.states = np.zeros(
-            (buffer_size, 3 * embedding_dim), dtype=np.float32)
+        self.states = np.zeros((buffer_size, 3 * embedding_dim), dtype=np.float32)
         self.actions = np.zeros((buffer_size, embedding_dim), dtype=np.float32)
         self.rewards = np.zeros((buffer_size,), dtype=np.float32)
-        self.next_states = np.zeros(
-            (buffer_size, 3 * embedding_dim), dtype=np.float32)
+        self.next_states = np.zeros((buffer_size, 3 * embedding_dim), dtype=np.float32)
         self.dones = np.zeros((buffer_size,), dtype=np.bool)
 
         self.sum_tree = SumTree(buffer_size)

@@ -42,7 +42,7 @@ def main(
                 random.randint(*user_ID_range),
                 random.randint(*movie_ID_range),
                 random.randint(*RATING_RANGE),
-                i
+                i,
             ]
         )
     ratings_df = pd.DataFrame(ratings, columns=RATING_COLS)

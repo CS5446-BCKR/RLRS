@@ -2,10 +2,16 @@ from pathlib import Path
 
 import pandas as pd
 
+
 class Food:
 
     def __init__(
-        self, menuItems: pd.DataFrame, modGroups: pd.DataFrame, modItems: pd.DataFrame, orders: pd.DataFrame, orderItems: pd.DataFrame
+        self,
+        menuItems: pd.DataFrame,
+        modGroups: pd.DataFrame,
+        modItems: pd.DataFrame,
+        orders: pd.DataFrame,
+        orderItems: pd.DataFrame,
     ):
         self.menuItems: pd.DataFrame = menuItems
         self.modGroups: pd.DataFrame = modGroups
@@ -13,10 +19,10 @@ class Food:
         self.orders: pd.DataFrame = orders
         self.orderItems: pd.DataFrame = orderItems
 
-        self.idToMenuItem = self.menuItems.set_index('id').to_dict('index')
-        self.idToModGroup = self.modGroups.set_index('id').to_dict('index')
-        self.idToModItem = self.modItems.set_index('id').to_dict('index')
-        self.idToOrder = self.orders.set_index('order_id').to_dict('index')
+        self.idToMenuItem = self.menuItems.set_index("id").to_dict("index")
+        self.idToModGroup = self.modGroups.set_index("id").to_dict("index")
+        self.idToModItem = self.modItems.set_index("id").to_dict("index")
+        self.idToOrder = self.orders.set_index("order_id").to_dict("index")
 
     @classmethod
     def from_folder(cls, src: Path):

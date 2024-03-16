@@ -10,12 +10,10 @@ class ReplayMemory:
         self.crt_idx = 0
 
         # setup memory
-        self.states = np.zeros(
-            (memory_size, 3 * embedding_dim), dtype=np.float32)
+        self.states = np.zeros((memory_size, 3 * embedding_dim), dtype=np.float32)
         self.actions = np.zeros((memory_size, embedding_dim), dtype=np.float32)
         self.rewards = np.zeros((memory_size,), dtype=np.float32)
-        self.next_states = np.zeros(
-            (memory_size, 3 * embedding_dim), dtype=np.float32)
+        self.next_states = np.zeros((memory_size, 3 * embedding_dim), dtype=np.float32)
         self.dones = np.zeros((memory_size,), dtype=np.bool)
         self.rewards[memory_size - 1] = SENTIAL_REWARD_VALUE
 
