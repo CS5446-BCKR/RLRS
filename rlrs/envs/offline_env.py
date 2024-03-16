@@ -6,19 +6,25 @@ import numpy as np
 from rlrs.datasets.movielens import MovieLens
 
 UserStateInfo = namedtuple(
-    "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"])
+    "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"]
+)
 
 
-class MovieLenOfflineEnv:
+class OfflineEnv:
     """ """
 
-    def __init__(self, db: MovieLens, state_size: int, rating_threshold: int, user_id: Optional[int] = None):
+    def __init__(
+        self,
+        db: MovieLens,
+        state_size: int,
+        rating_threshold: int,
+        user_id: Optional[int] = None,
+    ):
         self.db = db
         self.state_size = state_size
         self.rating_threshild = rating_threshold
         self.user_id = user_id
-        self.avail_users = self.db.filter_user_by_history(
-            lambda x: x > state_size)
+        self.avail_users = self.db.filter_user_by_history(lambda x: x > state_size)
 
         self.reset()
         self.done_count = 3000
@@ -65,12 +71,8 @@ class MovieLenOfflineEnv:
         """
         raise NotImplementedError()
 
-    def get_item_names(self, item_ids):
-        # should call db
-        raise NotImplementedError()
-
     def get_positive_items(self, user_idx):
-        """ Return the item ids of positive items """
+        """Return the item ids of positive items"""
         return self.db.get_positive_items(user_idx, self.rating_threshild)
 
     @property
@@ -92,3 +94,7 @@ class MovieLenOfflineEnv:
         Return all items in the env
         """
         return self.db.items
+
+    @property
+    def database(self):
+        return self.db

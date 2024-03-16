@@ -3,7 +3,7 @@ from omegaconf import DictConfig, OmegaConf
 from path import Path
 
 from rlrs.datasets.movielens import MovieLens
-from rlrs.envs.movielens_env import MovieLenOfflineEnv
+from rlrs.envs.offline_env import OfflineEnv
 from rlrs.foodorder_recommender import FoodOrderRecommender
 from rlrs.movie_recommender import MovieRecommender
 # from rlrs.train import RecommenderTrainer
@@ -12,7 +12,7 @@ from rlrs.movie_recommender import MovieRecommender
 def load_recommender(config: DictConfig):
     if config["type"] == "movie":
         db = MovieLens.from_folder()
-        env = MovieLenOfflineEnv(db, state_size=config["state_size"])
+        env = OfflineEnv(db, state_size=config["state_size"])
         return MovieRecommender(env, config)
     elif config["type"] == "food":
         return FoodOrderRecommender(config)

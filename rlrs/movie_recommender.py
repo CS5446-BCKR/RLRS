@@ -12,7 +12,7 @@ from path import Path
 from typing import Optional
 
 from rlrs.embeddings.base import DummyEmbedding
-from rlrs.envs.movielens_env import MovieLenOfflineEnv
+from rlrs.envs.offline_env import OfflineEnv
 from rlrs.nets.actor import Actor
 from rlrs.nets.critic import Critic
 from rlrs.nets.state_module import DRRAve
@@ -20,7 +20,7 @@ from rlrs.replay.replay_buffer import PriorityExperienceReplay
 
 
 class MovieRecommender:
-    def __init__(self, env: MovieLenOfflineEnv, cfg: DictConfig):
+    def __init__(self, env: OfflineEnv, cfg: DictConfig):
         self.dim = cfg["dim"]
         self.state_size = cfg["state_size"]
         self.actor_hidden_dim = cfg["actor_hidden_dim"]
@@ -241,7 +241,6 @@ class MovieRecommender:
         self.actor.load(actor_checkpoint)
         critic_checkpoint = self.get_critic_checkpoint(subdir)
         self.critic.load(critic_checkpoint)
-
 
 
 # Line 11 In PER paper
