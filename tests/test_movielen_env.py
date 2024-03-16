@@ -18,3 +18,10 @@ def test_loading_offline_env():
     assert env.db == db
     assert len(env.users) == 4
     assert set(env.users) == set([7, 8, 9, 10])
+
+
+def test_loading_specific_env():
+    db: MovieLens = MovieLens.from_folder(TEST_DATA)
+    env: OfflineEnv = OfflineEnv(
+        db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=9
+    )

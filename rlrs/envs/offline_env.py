@@ -71,10 +71,6 @@ class OfflineEnv:
         """
         raise NotImplementedError()
 
-    def get_positive_items(self, user_idx):
-        """Return the item ids of positive items"""
-        return self.db.get_positive_items(user_idx, self.rating_threshold)
-
     @property
     def num_users(self):
         return self.avail_users

@@ -92,26 +92,16 @@ class MovieRecommender:
             lr=self.critic_lr,
         )
 
-    def recommend(self, user_idx, action=None):
+    def recommend(self, action):
         """
         Get *action* from the actor, multiply with the historical positive embeddings.
         Recommended items are those with the highest scores.
         """
-        if action is None:
-            # 1. Get embeddings of historical positive embs
-            positive_item_indexes = self.env.get_positive_items(user_idx)
-            positive_embs = self.item_embeddings[positive_item_indexes]
-            user_emb = self.user_embeddings[user_idx]
-
-            # 2. Get state
-            state = self.drr_ave((user_emb, positive_embs))
-            # feed to Actor to generate the action scores
-            action = self.actor(state)
-
         # TODO: make it more flexible
         # Nx D * Dx1
         scores = torch.mm(self.item_embeddings.all, action)
-        return torch.argsort(scores, descending=True)
+        indices = torch.argsort(scores, descending=True)
+        return self.items.loc[indices.numpy()].index
 
     def train_on_episode(self):
         episode_reward = 0
@@ -136,10 +126,10 @@ class MovieRecommender:
                 action += np.random.normal(0, self.std, size=action.shape)
 
             # Line 9: Recommend the new item
-            recommended_item = self.recommend(user_id, action)
+            recommended_items = self.recommend(action)
 
             # Line 10: Calculate the reward and the next state
-            next_user_state = self.env.step(recommended_item)
+            next_user_state = self.env.step(recommended_items)
             reward = next_user_state.reward
 
             # Line 11 Get representation of the next state

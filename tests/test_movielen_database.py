@@ -2,7 +2,7 @@ from collections import Counter
 
 from pytest import fixture
 
-from rlrs.datasets.movielens import MovieLens
+from rlrs.datasets.movielens import MOVIE_IDX_COL, MovieLens
 
 TEST_DATA = "data/test_data/ml/"
 
@@ -42,12 +42,4 @@ def test_num_items(db):
 def test_items(db):
     assert db.items is not None
     assert len(db.items) == 6
-
-
-def test_get_positive_items(db):
-    user_id = 9
-    thres = 4
-    items = db.get_positive_items(user_id, thres)
-
-    assert len(items) == 4
-    assert set(items) == set([11, 14, 15])
+    assert db.items.index.name == MOVIE_IDX_COL

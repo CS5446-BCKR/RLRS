@@ -4,14 +4,13 @@ TODO:
 - Add users size sampling
 """
 
-from typing import Callable
-
 import pandas as pd
 from path import Path
 
 USER_IDX_COL = "UserID"
 MOVIE_IDX_COL = "MovieID"
 RATING_COL = "Rating"
+TIMESTAMP_COL = "Timestamp"
 
 
 class MovieLens:
@@ -21,8 +20,8 @@ class MovieLens:
     ):
 
         self.movies: pd.DataFrame = movies.set_index(MOVIE_IDX_COL)
-        self.users: pd.DataFrame = users
-        self.ratings: pd.DataFrame = ratings
+        self.users: pd.DataFrame = users.set_index(USER_IDX_COL)
+        self.ratings: pd.DataFrame = ratings.sort_values(by=TIMESTAMP_COL)
 
         self.id2movies = self.movies.to_dict("index")
         self.freq = (
@@ -37,14 +36,6 @@ class MovieLens:
 
     def get_ratings(self, user):
         return self.ratings[self.ratings.UserID == user]
-
-    def get_positive_items(self, user, thres):
-        """
-        Returns the list of itemID/MovieID
-        """
-        return self.ratings[
-            (self.ratings[USER_IDX_COL] == user) & (self.ratings[RATING_COL] >= thres)
-        ][MOVIE_IDX_COL]
 
     @classmethod
     def from_folder(cls, src: Path):

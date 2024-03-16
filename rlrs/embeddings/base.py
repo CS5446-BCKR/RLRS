@@ -3,6 +3,7 @@ TODO: Return Torch tensor
 """
 
 from abc import ABC, abstractmethod
+from functools import cached_property
 
 import numpy as np
 import pandas as pd
@@ -42,7 +43,7 @@ class DummyEmbedding(EmbeddingBase):
             return embs
         return torch.stack(embs.tolist())
 
-    @property
+    @cached_property
     def all(self):
         """
         Not efficient here
