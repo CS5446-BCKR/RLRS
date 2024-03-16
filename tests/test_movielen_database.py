@@ -50,3 +50,10 @@ def test_items(db):
     assert db.items is not None
     assert len(db.items) == 6
     assert db.items.index.name == MOVIE_IDX_COL
+
+
+def test_user_history_length(db):
+    len = db.get_user_history_length(9)
+    assert len == 5
+    len = db.get_user_history_length(10)
+    assert len == 3

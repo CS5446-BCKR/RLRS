@@ -83,7 +83,17 @@ class OfflineEnv:
         for item in new_rec_items:
             if item in self.positive_items.index and item not in self.recommended_items:
                 true_positives.append(item)
-                rewards.append(self.db.get_rating(self.user, item))
+                rewards.append((self.db.get_rating(self.user, item) - 3) / 2.0)
+            else:
+                # false positive
+                rewards.append(-0.5)
+            self.recommended_items.add(item)
+        self.prev_positive_items = (
+            self.prev_positive_items[-len(true_positives) :] + true_positives
+        )
+
+        n_rec_items = len(self.recommended_items)
+        # if n_rec_items > self.done_count or n_rec_items >=
 
     @property
     def num_users(self):

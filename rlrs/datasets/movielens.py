@@ -46,7 +46,11 @@ class MovieLens:
         ratings = self.ratings[
             (self.ratings[USER_IDX_COL] == user) & (self.ratings[MOVIE_IDX_COL] == item)
         ][RATING_COL].values
+        # TODO: handle when we have state size
         return np.mean(ratings)
+
+    def get_user_history_length(self, user):
+        return len(self.ratings[self.ratings[USER_IDX_COL] == user])
 
     @classmethod
     def from_folder(cls, src: Path):
