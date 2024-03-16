@@ -21,7 +21,7 @@ def db():
 
 
 def test_filter_user_by_history(db):
-    avail_users = db.filter_users_by_history(lambda x: x >= 3)
+    avail_users = db.get_users_by_history(3)
 
     assert len(avail_users) == 4
     assert set(avail_users) == set([7, 8, 9, 10])

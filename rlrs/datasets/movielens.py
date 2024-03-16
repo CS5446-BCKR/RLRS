@@ -32,8 +32,8 @@ class MovieLens:
     def id2movie(self, index: int):
         return self.id2movies[index]
 
-    def filter_users_by_history(self, key: Callable):
-        return self.freq.index[self.freq[MOVIE_IDX_COL].apply(key)].tolist()
+    def get_users_by_history(self, threshold: int):
+        return self.freq.index[self.freq[MOVIE_IDX_COL] >= threshold].tolist()
 
     def get_ratings(self, user):
         return self.ratings[self.ratings.UserID == user]

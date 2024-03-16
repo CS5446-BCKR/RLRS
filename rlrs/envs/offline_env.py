@@ -22,9 +22,9 @@ class OfflineEnv:
     ):
         self.db = db
         self.state_size = state_size
-        self.rating_threshild = rating_threshold
+        self.rating_threshold = rating_threshold
         self.user_id = user_id
-        self.avail_users = self.db.filter_user_by_history(lambda x: x > state_size)
+        self.avail_users = self.db.get_users_by_history(state_size)
 
         self.reset()
         self.done_count = 3000
@@ -73,7 +73,7 @@ class OfflineEnv:
 
     def get_positive_items(self, user_idx):
         """Return the item ids of positive items"""
-        return self.db.get_positive_items(user_idx, self.rating_threshild)
+        return self.db.get_positive_items(user_idx, self.rating_threshold)
 
     @property
     def num_users(self):
@@ -83,6 +83,7 @@ class OfflineEnv:
     def num_items(self):
         return self.db.num_items
 
+    @property
     def users(self):
         """
         Return all users in the env
