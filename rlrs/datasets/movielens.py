@@ -11,6 +11,7 @@ from path import Path
 
 USER_IDX_COL = "UserID"
 MOVIE_IDX_COL = "MovieID"
+RATING_COL = "Rating"
 
 
 class MovieLens:
@@ -38,7 +39,12 @@ class MovieLens:
         return self.ratings[self.ratings.UserID == user]
 
     def get_positive_items(self, user, thres):
-        raise NotImplementedError()
+        """
+        Returns the list of itemID/MovieID
+        """
+        return self.ratings[
+            (self.ratings[USER_IDX_COL] == user) & (self.ratings[RATING_COL] >= thres)
+        ][MOVIE_IDX_COL]
 
     @classmethod
     def from_folder(cls, src: Path):
@@ -48,3 +54,11 @@ class MovieLens:
             pd.read_csv(src / "users.csv"),
             pd.read_csv(src / "ratings.csv"),
         )
+
+    @property
+    def num_items(self) -> int:
+        return len(self.movies)
+
+    @property
+    def items(self):
+        return self.movies

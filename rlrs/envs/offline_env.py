@@ -77,7 +77,7 @@ class OfflineEnv:
 
     @property
     def num_users(self):
-        return self.db.num_users
+        return self.avail_users
 
     @property
     def num_items(self):
