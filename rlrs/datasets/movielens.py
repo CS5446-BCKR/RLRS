@@ -4,6 +4,7 @@ TODO:
 - Add users size sampling
 """
 
+import numpy as np
 import pandas as pd
 from path import Path
 
@@ -36,6 +37,16 @@ class MovieLens:
 
     def get_ratings(self, user):
         return self.ratings[self.ratings.UserID == user]
+
+    def get_rating(self, user, item):
+        """
+        Return rating user gave to the item.
+        If it is rated multiple times, take the average.
+        """
+        ratings = self.ratings[
+            (self.ratings[USER_IDX_COL] == user) & (self.ratings[MOVIE_IDX_COL] == item)
+        ][RATING_COL].values
+        return np.mean(ratings)
 
     @classmethod
     def from_folder(cls, src: Path):

@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 
@@ -50,14 +50,17 @@ class OfflineEnv:
         self.user_ratings = {
             r.MovieID: r.Rating for r in ratings.itertuples(index=False)
         }
-        # historical positive items
-        self.prev_postive_items = ratings[: self.state_size]["MovieID"]
-        # assuming all previous items are recommended by the agent
-        self.recommended_items = set(self.prev_postive_items)
-        self.done = False
-        return UserStateInfo(self.user, self.prev_postive_items, self.done, 0)
 
-    def step(self, new_rec_item) -> UserStateInfo:
+        self.positive_items = ratings[ratings.Rating >= self.rating_threshold]
+
+        # historical positive items
+        self.prev_positive_items = self.positive_items.iloc[: self.state_size]
+        # assuming all previous items are recommended by the agent
+        self.recommended_items = set(self.prev_positive_items)
+        self.done = False
+        return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
+
+    def step(self, new_rec_items: List) -> UserStateInfo:
         """
         Given a new recommended item, the env calculate
         the updated reward, depending whether the agent
@@ -69,7 +72,18 @@ class OfflineEnv:
                  3. Whether we go through the whole session (`done`) .
                  4. Reward value
         """
-        raise NotImplementedError()
+        # Use reward function from Epn 10 in the paper
+        # For non-rating positive signal, may need to find
+        # alternatives
+
+        reward = -0.5
+        true_positives = []
+        rewards = []
+
+        for item in new_rec_items:
+            if item in self.positive_items.index and item not in self.recommended_items:
+                true_positives.append(item)
+                rewards.append(self.db.get_rating(self.user, item))
 
     @property
     def num_users(self):

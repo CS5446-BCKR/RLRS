@@ -35,6 +35,13 @@ def test_get_ratings(db):
     assert counter[14] == 1
 
 
+def test_get_rating(db):
+    ratings = db.get_rating(9, 15)
+    assert ratings == 4
+    ratings = db.get_rating(9, 11)
+    assert ratings == 3
+
+
 def test_num_items(db):
     assert db.num_items == 6
 
