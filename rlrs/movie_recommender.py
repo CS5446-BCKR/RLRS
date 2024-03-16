@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 from path import Path
+from typing import Optional
 
 from rlrs.embeddings.base import DummyEmbedding
 from rlrs.envs.movielens_env import MovieLenOfflineEnv
@@ -206,8 +207,7 @@ class MovieRecommender:
         self.actor.initialize()
         self.critic.initialize()
         # 2. Initialize Replay Buffer
-        self.buffer = PriorityExperienceReplay(
-            self.replay_memory_size, self.dim)
+        self.buffer = PriorityExperienceReplay(self.replay_memory_size, self.dim)
 
         for episode in range(self.M):
             episode_reward = self.train_on_episode()
@@ -216,8 +216,32 @@ class MovieRecommender:
             # saving model
             self.save()
 
-    def save(self):
-        raise NotImplementedError()
+    def _get_checkpoint_sub(self, subdir: Optional[Path] = None):
+        path = self.workspace
+        if subdir is not None:
+            path = path / subdir
+        return path
+
+    def get_actor_checkpoint(self, subdir: Optional[Path] = None):
+        actor_path = self._get_checkpoint_sub(subdir) / "actor.pth"
+        return actor_path
+
+    def get_critic_checkpoint(self, subdir: Optional[Path] = None):
+        critic_path = self._get_checkpoint_sub(subdir) / "critic.pth"
+        return critic_path
+
+    def save(self, subdir: Optional[Path] = None):
+        actor_checkpoint = self.get_actor_checkpoint(subdir)
+        self.actor.save(actor_checkpoint)
+        critic_checkpoint = self.get_critic_checkpoint(subdir)
+        self.critic.save(critic_checkpoint)
+
+    def load(self, subdir: Optional[Path] = None):
+        actor_checkpoint = self.get_actor_checkpoint(subdir)
+        self.actor.load(actor_checkpoint)
+        critic_checkpoint = self.get_critic_checkpoint(subdir)
+        self.critic.load(critic_checkpoint)
+
 
 
 # Line 11 In PER paper

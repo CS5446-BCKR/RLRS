@@ -2,9 +2,11 @@
 TODO (02/03/24): save and load networks
 """
 
+import torch
 from torch import nn
 from torch.optim import Adam, lr_scheduler
 from utils import soft_replace_update
+from path import Path
 
 
 class ActorModel(nn.Module):
@@ -31,7 +33,14 @@ class ActorModel(nn.Module):
 
 class Actor(nn.Module):
     def __init__(
-        self, input_dim, hidden_dim, output_dim, state_size, tau, lr, step_size
+        self,
+        input_dim,
+        hidden_dim,
+        output_dim,
+        state_size,
+        tau,
+        lr,
+        step_size,
     ):
         super(Actor, self).__init__()
         self.online_network = ActorModel(input_dim, hidden_dim, output_dim)
@@ -42,8 +51,7 @@ class Actor(nn.Module):
         self.step_size = step_size
         # hard code optimizer here
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(
-            self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
 
     def update_target(self):
         """
@@ -69,3 +77,18 @@ class Actor(nn.Module):
         outputs.backward(-state_grads)
         self.optim.step()
         self.scheduler.step()
+
+    def save(self, save_path: Path):
+        torch.save(
+            {
+                "online_network": self.online_network.state_dict(),
+                "target": self.target.state_dict(),
+            },
+            save_path,
+        )
+
+    def load(self, checkpoint_path: Path):
+        checkpoint = torch.load(checkpoint_path)
+
+        self.online_network.load_state_dict(checkpoint["online_network"])
+        self.target.load_state_dict(checkpoint["target"])

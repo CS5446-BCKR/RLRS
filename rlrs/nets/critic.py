@@ -8,6 +8,7 @@ from torch import nn
 from torch.autograd import grad
 from torch.optim import Adam, lr_scheduler
 from utils import soft_replace_update, weighted_mse_loss
+from path import Path
 
 
 class CriticNetwork(nn.Module):
@@ -34,8 +35,7 @@ class CriticNetwork(nn.Module):
 
         self.layers = nn.Sequential(
             [
-                nn.Linear(self.embedding_dim +
-                          self.input_state_dim, hidden_dim),
+                nn.Linear(self.embedding_dim + self.input_state_dim, hidden_dim),
                 nn.ReLU(),
                 nn.Linear(self.hidden_dim, self.hidden_dim),
                 nn.ReLU(),
@@ -79,8 +79,7 @@ class Critic(nn.Module):
         self.step_size = step_size
 
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(
-            self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
 
     def update_target(self):
         soft_replace_update(self.target, self.online_network, self.tau)
@@ -104,8 +103,7 @@ class Critic(nn.Module):
         """
         action, _ = inputs
         outputs = self.online_network(inputs)
-        grad_action = grad(
-            outputs, action, grad_outputs=torch.ones_like(outputs))
+        grad_action = grad(outputs, action, grad_outputs=torch.ones_like(outputs))
         return grad_action
 
     def forward(self, inputs):
@@ -113,3 +111,18 @@ class Critic(nn.Module):
 
     def target_forward(self, inputs):
         return self.target(inputs)
+
+    def save(self, save_path: Path):
+        torch.save(
+            {
+                "online_network": self.online_network.state_dict(),
+                "target": self.target.state_dict(),
+            },
+            save_path,
+        )
+
+    def load(self, checkpoint_path: Path):
+        checkpoint = torch.load(checkpoint_path)
+
+        self.online_network.load_state_dict(checkpoint["online_network"])
+        self.target.load_state_dict(checkpoint["target"])
