@@ -4,11 +4,11 @@ Estimate the Q-value given a state (from env + state network) and an action (fro
 """
 
 import torch
+from path import Path
 from torch import nn
 from torch.autograd import grad
 from torch.optim import Adam, lr_scheduler
 from utils import soft_replace_update, weighted_mse_loss
-from path import Path
 
 
 class CriticNetwork(nn.Module):

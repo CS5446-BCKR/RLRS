@@ -8,3 +8,4 @@ autoflake
 visidata
 omegaconf
 pytest
+isort

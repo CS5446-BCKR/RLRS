@@ -5,11 +5,12 @@ TODO:
  - Move training code to other place. 
 """
 
+from typing import Optional
+
 import numpy as np
 import torch
 from omegaconf import DictConfig
 from path import Path
-from typing import Optional
 
 from rlrs.embeddings.base import DummyEmbedding
 from rlrs.envs.offline_env import OfflineEnv

@@ -1,7 +1,8 @@
 from collections import Counter
-from rlrs.datasets.movielens import MovieLens
+
 from pytest import fixture
 
+from rlrs.datasets.movielens import MovieLens
 
 TEST_DATA = "data/test_data/ml/"
 
