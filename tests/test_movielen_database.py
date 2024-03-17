@@ -2,7 +2,7 @@ from collections import Counter
 
 from pytest import fixture
 
-from rlrs.datasets.movielens import MOVIE_IDX_COL, MovieLens
+from rlrs.datasets.movielens import MOVIE_IDX_COL, USER_IDX_COL, MovieLens
 
 TEST_DATA = "data/test_data/ml/"
 
@@ -57,3 +57,11 @@ def test_user_history_length(db):
     assert len == 5
     len = db.get_user_history_length(10)
     assert len == 3
+
+
+def test_item_col(db):
+    assert db.item_col == MOVIE_IDX_COL
+
+
+def test_user_col(db):
+    assert db.user_col == USER_IDX_COL

@@ -68,3 +68,11 @@ class MovieLens:
     @property
     def items(self):
         return self.movies
+
+    @property
+    def item_col(self) -> str:
+        return MOVIE_IDX_COL
+
+    @property
+    def user_col(self) -> str:
+        return USER_IDX_COL
