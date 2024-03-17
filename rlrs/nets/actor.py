@@ -3,10 +3,12 @@ TODO (02/03/24): save and load networks
 """
 
 import torch
+from omegaconf import DictConfig
 from path import Path
 from torch import nn
 from torch.optim import Adam, lr_scheduler
-from utils import soft_replace_update
+
+from .utils import soft_replace_update
 
 
 class ActorModel(nn.Module):
@@ -37,7 +39,6 @@ class Actor(nn.Module):
         input_dim,
         hidden_dim,
         output_dim,
-        state_size,
         tau,
         lr,
         step_size,
@@ -45,8 +46,10 @@ class Actor(nn.Module):
         super(Actor, self).__init__()
         self.online_network = ActorModel(input_dim, hidden_dim, output_dim)
         self.target = ActorModel(input_dim, hidden_dim, output_dim)
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
         self.tau = tau
-        self.state_size = state_size
         self.lr = lr
         self.step_size = step_size
         # hard code optimizer here
@@ -83,6 +86,12 @@ class Actor(nn.Module):
             {
                 "online_network": self.online_network.state_dict(),
                 "target": self.target.state_dict(),
+                "input_dim": self.input_dim,
+                "hidden_dim": self.hidden_dim,
+                "output_dim": self.output_dim,
+                "lr": self.lr,
+                "step_size": self.step_size,
+                "tau": self.tau,
             },
             save_path,
         )
@@ -92,3 +101,29 @@ class Actor(nn.Module):
 
         self.online_network.load_state_dict(checkpoint["online_network"])
         self.target.load_state_dict(checkpoint["target"])
+
+    @classmethod
+    def from_checkpoint(cls, checkpoint_path: Path):
+        checkpoint = torch.load(checkpoint_path)
+        model = cls(
+            input_dim=checkpoint["input_dim"],
+            hidden_dim=checkpoint["hidden_dim"],
+            output_dim=checkpoint["output_dim"],
+            tau=checkpoint["tau"],
+            lr=checkpoint["lr"],
+            step_size=checkpoint["step_size"],
+        )
+        model.load(checkpoint_path)
+        return model
+
+    @classmethod
+    def from_config(cls, cfg: DictConfig):
+        model = cls(
+            input_dim=cfg["input_dim"],
+            hidden_dim=cfg["hidden_dim"],
+            output_dim=cfg["output_dim"],
+            tau=cfg["tau"],
+            lr=cfg["lr"],
+            step_size=cfg["step_size"],
+        )
+        return model

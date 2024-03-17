@@ -37,6 +37,6 @@ class DRRAve(nn.Module):
     def from_checkpoint(cls, checkpoint_path: Path):
         checkpoint = torch.load(checkpoint_path)
 
-        model = DRRAve(checkpoint["input_dim"])
+        model = cls(checkpoint["input_dim"])
         model.load_state_dict(checkpoint["state_dict"])
         return model
