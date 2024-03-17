@@ -4,11 +4,13 @@ Estimate the Q-value given a state (from env + state network) and an action (fro
 """
 
 import torch
+from omegaconf import DictConfig
 from path import Path
 from torch import nn
 from torch.autograd import grad
 from torch.optim import Adam, lr_scheduler
-from utils import soft_replace_update, weighted_mse_loss
+
+from .utils import soft_replace_update, weighted_mse_loss
 
 
 class CriticNetwork(nn.Module):
@@ -18,29 +20,23 @@ class CriticNetwork(nn.Module):
         input_state_dim,
         embedding_dim,
         hidden_dim,
-        output_dim,
-        tau,
     ):
-        super(CriticNetwork, self).__init_()
+        super(CriticNetwork, self).__init__()
         self.input_action_dim = input_action_dim
         self.input_state_dim = input_state_dim
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
-        self.output_dim = output_dim
-        self.tau = tau
 
         self.action_fc = nn.Sequential(
-            [nn.Linear(input_action_dim, embedding_dim), nn.ReLU()]
+            nn.Linear(input_action_dim, embedding_dim), nn.ReLU()
         )
 
         self.layers = nn.Sequential(
-            [
-                nn.Linear(self.embedding_dim + self.input_state_dim, hidden_dim),
-                nn.ReLU(),
-                nn.Linear(self.hidden_dim, self.hidden_dim),
-                nn.ReLU(),
-                nn.Linear(self.hidden_dim, 1),
-            ]
+            nn.Linear(self.embedding_dim + self.input_state_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Linear(self.hidden_dim, 1),
         )
 
     def forward(self, inputs):
@@ -51,7 +47,7 @@ class CriticNetwork(nn.Module):
         """
         action, state = inputs
         action_emb = self.action_fc(action)
-        net_inputs = torch.cat((action_emb, state), dim=1)
+        net_inputs = torch.cat((action_emb, state), dim=-1)
         qvalue = self.layers(net_inputs)
         return qvalue
 
@@ -64,16 +60,20 @@ class Critic(nn.Module):
         embedding_dim,
         hidden_dim,
         tau,
-        step_size,
         lr,
+        step_size,
     ):
         super(Critic, self).__init__()
-        self.online_network = Critic(
+        self.online_network = CriticNetwork(
             input_action_dim, input_state_dim, embedding_dim, hidden_dim
         )
-        self.target = Critic(
+        self.target = CriticNetwork(
             input_action_dim, input_state_dim, embedding_dim, hidden_dim
         )
+        self.input_action_dim = input_action_dim
+        self.input_state_dim = input_state_dim
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
         self.tau = tau
         self.lr = lr
         self.step_size = step_size
@@ -117,12 +117,45 @@ class Critic(nn.Module):
             {
                 "online_network": self.online_network.state_dict(),
                 "target": self.target.state_dict(),
+                "input_action_dim": self.input_action_dim,
+                "input_state_dim": self.input_state_dim,
+                "embedding_dim": self.embedding_dim,
+                "hidden_dim": self.hidden_dim,
+                "tau": self.tau,
+                "lr": self.lr,
+                "step_size": self.step_size,
             },
             save_path,
         )
 
     def load(self, checkpoint_path: Path):
         checkpoint = torch.load(checkpoint_path)
-
         self.online_network.load_state_dict(checkpoint["online_network"])
         self.target.load_state_dict(checkpoint["target"])
+
+    @classmethod
+    def from_checkpoint(cls, checkpoint_path: Path):
+        checkpoint = torch.load(checkpoint_path)
+        model = cls(
+            input_action_dim=checkpoint["input_action_dim"],
+            input_state_dim=checkpoint["input_state_dim"],
+            embedding_dim=checkpoint["embedding_dim"],
+            hidden_dim=checkpoint["hidden_dim"],
+            tau=checkpoint["tau"],
+            lr=checkpoint["lr"],
+            step_size=checkpoint["step_size"],
+        )
+        model.load(checkpoint_path)
+        return model
+
+    @classmethod
+    def from_config(cls, cfg: DictConfig):
+        return cls(
+            input_action_dim=cfg["input_action_dim"],
+            input_state_dim=cfg["input_state_dim"],
+            embedding_dim=cfg["embedding_dim"],
+            hidden_dim=cfg["hidden_dim"],
+            tau=cfg["tau"],
+            lr=cfg["lr"],
+            step_size=cfg["step_size"],
+        )
