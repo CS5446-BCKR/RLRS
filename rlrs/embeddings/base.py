@@ -38,10 +38,13 @@ class DummyEmbedding(EmbeddingBase):
 
     def __getitem__(self, index) -> torch.Tensor:
         assert self.embs is not None
-        embs = self.embs.loc[index].values
+        embs = self.embs.loc[index]["emb"]
         if isinstance(embs, torch.Tensor):
             return embs
-        return torch.stack(embs.tolist())
+        embs = embs.tolist()
+        if not embs:
+            return None
+        return torch.stack(embs)
 
     @cached_property
     def all(self):

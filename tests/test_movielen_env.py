@@ -1,7 +1,7 @@
 import numpy as np
 from pytest import fixture
 
-from rlrs.datasets.movielens import MOVIE_IDX_COL, MovieLens
+from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.offline_env import OfflineEnv
 
 TEST_DATA = "data/test_data/ml/"
