@@ -6,6 +6,7 @@ import numpy as np
 from rlrs.datasets.movielens import MovieLens
 
 DEFAULT_DONE_COUNT = 3000
+NEGATIVE_REWARD = -0.5
 
 UserStateInfo = namedtuple(
     "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"]
@@ -61,13 +62,14 @@ class OfflineEnv:
 
         self.positive_items = ratings[ratings.Rating >= self.rating_threshold][
             self.db.item_col
-        ]
+        ].values
 
         # historical positive items
-        self.prev_positive_items = self.positive_items.iloc[: self.state_size]
+
+        self.prev_positive_items = self.positive_items[: self.state_size].tolist()
         # assuming all previous items are recommended by the agent
         self.recommended_items = set(self.prev_positive_items)
-        self.done = False
+        self.done = len(self.prev_positive_items) == 0
         return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
 
     def step(self, new_rec_items: List) -> UserStateInfo:
@@ -89,20 +91,33 @@ class OfflineEnv:
         true_positives = []
         rewards = []
 
+        """
+        Different from the paper, we allow repeated recommendation
+        until the customers get annoyed.
+        """
+
         for item in new_rec_items:
-            if item in self.positive_items.index and item not in self.recommended_items:
+            if item in self.positive_items:
                 true_positives.append(item)
-                rewards.append((self.db.get_rating(self.user, item) - 3) / 2.0)
+                rating = self.db.get_rating(self.user, item)
+                rewards.append((rating - (self.rating_threshold - 1)) / 2.0)
             else:
                 # false positive
-                rewards.append(-0.5)
+                rewards.append(NEGATIVE_REWARD)
             self.recommended_items.add(item)
         self.prev_positive_items = (
             self.prev_positive_items[-len(true_positives) :] + true_positives
         )
 
         n_rec_items = len(self.recommended_items)
-        # if n_rec_items > self.done_count or n_rec_items >=
+        if (
+            n_rec_items > self.done_count
+            or n_rec_items >= self.db.get_user_history_length(self.user)
+        ):
+            self.done = True
+        return UserStateInfo(
+            self.user, self.prev_positive_items, self.done, np.mean(rewards)
+        )
 
     @property
     def num_users(self) -> int:

@@ -1,3 +1,4 @@
+import numpy as np
 from pytest import fixture
 
 from rlrs.datasets.movielens import MOVIE_IDX_COL, MovieLens
@@ -7,6 +8,7 @@ TEST_DATA = "data/test_data/ml/"
 STATE_SIZE = 3
 RATING_THRESHOLD = 3
 USER_ID = 9
+EMPTY_HIS_USER_ID = 7
 
 
 def test_loading_offline_env():
@@ -45,14 +47,42 @@ def env():
     return env
 
 
+@fixture
+def neg_env():
+    db: MovieLens = MovieLens.from_folder(TEST_DATA)
+    env: OfflineEnv = OfflineEnv(
+        db,
+        state_size=STATE_SIZE,
+        rating_threshold=RATING_THRESHOLD,
+        user_id=EMPTY_HIS_USER_ID,
+    )
+    return env
+
+
 def test_env_reset(env):
     state = env.reset()
 
     assert state.user_id == USER_ID
-    assert all(state.prev_pos_items == [15, 11, 14])
+    assert state.prev_pos_items == [15, 11, 14]
     assert env.recommended_items == set([15, 11, 14])
     assert not state.done
     assert state.reward == 0
 
 
-def test_env_step(env): ...
+def test_empty_historical_positive(neg_env):
+    state = neg_env.reset()
+    assert state.user_id == EMPTY_HIS_USER_ID
+    assert state.prev_pos_items == []
+    assert neg_env.recommended_items == set([])
+    assert state.done
+    assert state.reward == 0
+
+
+def test_env_step_positive_item(env):
+    state = env.step([14])
+    assert np.allclose(state.reward, 1.0)
+
+
+def test_env_step_negative_item(env):
+    state = env.step([13])
+    assert np.allclose(state.reward, -0.5)
