@@ -5,6 +5,8 @@ import numpy as np
 
 from rlrs.datasets.movielens import MovieLens
 
+DEFAULT_DONE_COUNT = 3000
+
 UserStateInfo = namedtuple(
     "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"]
 )
@@ -19,15 +21,20 @@ class OfflineEnv:
         state_size: int,
         rating_threshold: int,
         user_id: Optional[int] = None,
+        done_count: int = DEFAULT_DONE_COUNT,
     ):
         self.db = db
         self.state_size = state_size
         self.rating_threshold = rating_threshold
-        self.user_id = user_id
-        self.avail_users = self.db.get_users_by_history(state_size)
+        if user_id is None:
+            self.avail_users = self.db.get_users_by_history(state_size)
+        else:
+            self.avail_users = [user_id]
 
+        self.user = None
         self.reset()
-        self.done_count = 3000
+        assert self.user is not None
+        self.done_count = done_count
 
     def reset(self) -> UserStateInfo:
         """
@@ -43,7 +50,7 @@ class OfflineEnv:
                  3. Whether we go through the whole session (`done`) .
                  4. Reward value
         """
-        self.user = self.user_id or np.random.choice(self.avail_users)
+        self.user = np.random.choice(self.avail_users)
 
         ratings = self.db.get_ratings(self.user)
 
@@ -76,7 +83,6 @@ class OfflineEnv:
         # For non-rating positive signal, may need to find
         # alternatives
 
-        reward = -0.5
         true_positives = []
         rewards = []
 
@@ -96,26 +102,30 @@ class OfflineEnv:
         # if n_rec_items > self.done_count or n_rec_items >=
 
     @property
-    def num_users(self):
-        return self.avail_users
+    def num_users(self) -> int:
+        return len(self.avail_users)
 
     @property
-    def num_items(self):
+    def num_items(self) -> int:
         return self.db.num_items
 
     @property
-    def users(self):
+    def users(self) -> List:
         """
         Return all users in the env
         """
         return self.avail_users
 
+    @property
     def items(self):
         """
-        Return all items in the env
+        Return all items (dataframe) in the env
         """
         return self.db.items
 
     @property
     def database(self):
+        """
+        Return the underlying database of the environment
+        """
         return self.db
