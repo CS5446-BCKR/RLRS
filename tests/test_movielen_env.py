@@ -1,11 +1,12 @@
 from pytest import fixture
 
-from rlrs.datasets.movielens import MovieLens
+from rlrs.datasets.movielens import MOVIE_IDX_COL, MovieLens
 from rlrs.envs.offline_env import OfflineEnv
 
 TEST_DATA = "data/test_data/ml/"
 STATE_SIZE = 3
 RATING_THRESHOLD = 3
+USER_ID = 9
 
 
 def test_loading_offline_env():
@@ -25,7 +26,7 @@ def test_loading_offline_env():
 def test_loading_specific_env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
     env: OfflineEnv = OfflineEnv(
-        db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=9
+        db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=USER_ID
     )
 
     assert env.database == db
@@ -39,12 +40,19 @@ def test_loading_specific_env():
 def env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
     env: OfflineEnv = OfflineEnv(
-        db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=9
+        db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=USER_ID
     )
     return env
 
 
-def test_env_reset(env): ...
+def test_env_reset(env):
+    state = env.reset()
+
+    assert state.user_id == USER_ID
+    assert all(state.prev_pos_items == [15, 11, 14])
+    assert env.recommended_items == set([15, 11, 14])
+    assert not state.done
+    assert state.reward == 0
 
 
 def test_env_step(env): ...

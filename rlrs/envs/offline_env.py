@@ -54,11 +54,14 @@ class OfflineEnv:
 
         ratings = self.db.get_ratings(self.user)
 
+        # TODO: generalize this
         self.user_ratings = {
             r.MovieID: r.Rating for r in ratings.itertuples(index=False)
         }
 
-        self.positive_items = ratings[ratings.Rating >= self.rating_threshold]
+        self.positive_items = ratings[ratings.Rating >= self.rating_threshold][
+            self.db.item_col
+        ]
 
         # historical positive items
         self.prev_positive_items = self.positive_items.iloc[: self.state_size]
