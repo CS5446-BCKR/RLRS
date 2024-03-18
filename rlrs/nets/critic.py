@@ -101,10 +101,14 @@ class Critic(nn.Module):
         """
         calc gradients w.r.t actions
         """
-        action, _ = inputs
-        outputs = self.online_network(inputs)
-        grad_action = grad(outputs, action, grad_outputs=torch.ones_like(outputs))
-        return grad_action
+        action, state = inputs
+        action.requires_grad = True
+        state.requires_grad = True
+        outputs = self.online_network.forward(inputs)
+        grads = grad(
+            outputs, inputs, grad_outputs=torch.ones_like(outputs), allow_unused=True
+        )
+        return grads[0]
 
     def forward(self, inputs):
         return self.online_network(inputs)
