@@ -92,47 +92,53 @@ class MovieRecommender:
         """
         # TODO: make it more flexible
         # Nx D * Dx1
-        scores = torch.mm(self.item_embeddings.all, action)
-        indices = torch.argsort(scores, descending=True)
-        return self.items.loc[indices.numpy()].index
+        scores = torch.mm(self.item_embeddings.all, action[:, None])
+        indices = torch.argsort(scores.squeeze(), descending=True).squeeze()
+        return self.items.iloc[indices.numpy()].index
 
     def train_on_episode(self):
         episode_reward = 0
         # 3. (Line 5) observe the initial state
-        user_id, prev_items, done = self.env.reset()
+        print("Line 5")
+        init_state = self.env.reset()
+        user_id = init_state.user_id
+        prev_items = init_state.prev_pos_items
+        done = init_state.done
         while not done:  # Line 6
+            print("Line 6")
             user_emb = self.user_embeddings[user_id]
             items_emb = self.item_embeddings[prev_items]
 
             # Line 7: Find the state via DRR
-            user_emb = torch.from_numpy(user_emb)
-            items_emb = torch.from_numpy(items_emb)
             drr_inputs = (user_emb, items_emb)
             state = self.drr_ave(drr_inputs)
 
             # Line 8: Find the action based on the curernt policy
             action = self.actor(state)
-            action = action.numpy()
+            print("Line 8")
             # and apply epsilon-greedy exploration
             if self.eps > np.random.uniform():
                 self.eps -= self.eps_decay
-                action += np.random.normal(0, self.std, size=action.shape)
+                action += torch.normal(torch.zeros_like(action), self.std)
 
             # Line 9: Recommend the new item
             recommended_items = self.recommend(action)
+            print("Line 9")
 
             # Line 10: Calculate the reward and the next state
             next_user_state = self.env.step(recommended_items)
             reward = next_user_state.reward
+            print("Line 10")
 
             # Line 11 Get representation of the next state
             next_item_embs = self.item_embeddings[next_user_state.prev_pos_items]
-            next_item_embs = torch.from_numpy(next_item_embs)
             next_state_inputs = (user_emb, next_item_embs)
             next_state = self.drr_ave(next_state_inputs)
+            print("Line 11")
 
             # Line 12: Update the buffer
             self.buffer.append(state, action, reward, next_state, done)
+            print("Line 12")
 
             # Line 13: Sample a minibatch of N transitions
             # with **prioritized experience replay sampling**
@@ -156,7 +162,7 @@ class MovieRecommender:
                 )
 
                 # Clipped Double Q-learn
-                Q_min = torch.min(torch.hstack((Q, Q_target)), dim=0)[0]
+                Q_min = torch.min(torch.hstack((Q, Q_target)), dim=-1)[0]
 
                 TD_err = calc_TD_error(
                     payload.rewards,
@@ -164,21 +170,26 @@ class MovieRecommender:
                     payload.dones,
                     self.discount_factor,
                 )
+                print("Line 13")
 
                 # Update the buffer
                 for p, i in zip(TD_err, payload.indexes):
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
+                print("Line 13: Update Buffer")
 
                 # train critic
-                critic_inputs = (payload.actions, payload.states)
-                self.critic.fit(critic_inputs, TD_err, payload.weights)
+                critic_inputs = (payload.actions.detach(), payload.states.detach())
+                self.critic.fit(critic_inputs, TD_err.detach(), payload.weights)
+                print("Line 13: Train critic")
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
-                self.actor.fit(payload.states, state_grads)
+                self.actor.fit(payload.states.detach(), state_grads.detach())
+                print("Line 13: Train actor")
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()
+                print("Line 13: soft Update strategies")
 
             # move to the next state
             prev_items = next_user_state.prev_pos_items
@@ -191,7 +202,11 @@ class MovieRecommender:
         self.actor.initialize()
         self.critic.initialize()
         # 2. Initialize Replay Buffer
-        self.buffer = PriorityExperienceReplay(self.replay_memory_size, self.dim)
+        self.buffer = PriorityExperienceReplay(
+            self.replay_memory_size,
+            state_dim=self.drr_output_dim,
+            action_dim=self.dim,
+        )
 
         for episode in range(self.M):
             episode_reward = self.train_on_episode()
@@ -229,8 +244,8 @@ class MovieRecommender:
 
 # Line 11 In PER paper
 def calc_TD_error(reward, Q, dones, discount_factor):
-    Q_target = np.zeros_like(Q)
-    Q_target = reward + (1.0 - dones) * (discount_factor * Q)
+    Q_target = torch.zeros_like(Q)
+    Q_target = reward + (1.0 - dones.float()) * (discount_factor * Q)
     return Q_target
 
 

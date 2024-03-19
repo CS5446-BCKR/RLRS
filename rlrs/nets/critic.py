@@ -90,7 +90,6 @@ class Critic(nn.Module):
     def fit(self, inputs, y, weights):
         self.online_network.train()
         self.optim.zero_grad()
-        self.optim.zero_grad()
         outputs = self.online_network(inputs)
         loss = weighted_mse_loss(outputs, y, weights)
         loss.backward()

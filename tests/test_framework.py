@@ -1,4 +1,5 @@
 from omegaconf import OmegaConf
+from pytest import fixture
 
 from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.offline_env import OfflineEnv
@@ -7,7 +8,8 @@ from rlrs.movie_recommender import MovieRecommender
 CFG = "configs/movielen_base.yaml"
 
 
-def test_init_framework():
+@fixture
+def recommender():
     cfg = OmegaConf.load(CFG)
     dataset = MovieLens.from_folder(cfg["input_data"])
     env = OfflineEnv(
@@ -16,4 +18,13 @@ def test_init_framework():
         rating_threshold=cfg["rating_threshold"],
         user_id=1,
     )
-    recommender = MovieRecommender(env, cfg)
+    return MovieRecommender(env, cfg)
+
+
+def test_init_framework(recommender):
+    # dummy check
+    recommender is not None
+
+
+def test_train_framework(recommender):
+    recommender.train()

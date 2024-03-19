@@ -47,7 +47,7 @@ class PriorityExperienceReplay:
         self.beta_constant = 1e-5
 
     def empty(self):
-        return self.crt_idx <= 1 and not self.buffer.is_full
+        return self.crt_idx <= 1 and not self.is_full
 
     def append(self, state, action, reward, next_state, done):
         self.states[self.crt_idx] = state
@@ -105,6 +105,6 @@ class PriorityExperienceReplay:
             self.rewards[rd_idx],
             self.next_states[rd_idx],
             self.dones[rd_idx],
-            torch.array(weight_batch),
+            torch.Tensor(weight_batch),
             index_batch,
         )
