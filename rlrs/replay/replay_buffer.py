@@ -4,10 +4,11 @@ TODO: switch to pytorch tensor
 
 import random
 from collections import namedtuple
-from omegaconf import DictConfig
 
 import torch
-from trees import MinTree, SumTree
+from omegaconf import DictConfig
+
+from .trees import MinTree, SumTree
 
 BatchBufferPayload = namedtuple(
     "BatchBufferPayload",

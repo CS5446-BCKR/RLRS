@@ -22,16 +22,10 @@ from rlrs.replay.replay_buffer import PriorityExperienceReplay
 
 class MovieRecommender:
     def __init__(self, env: OfflineEnv, cfg: DictConfig):
+        self.env = env
+        self.cfg = cfg
         self.dim = cfg["dim"]
         self.state_size = cfg["state_size"]
-        self.actor_hidden_dim = cfg["actor_hidden_dim"]
-        self.actor_lr = cfg["actor_lr"]
-        self.actor_step_size = cfg["step_size"]
-
-        self.critic_action_emb_dim = cfg["critic_action_emb_dim"]
-        self.critic_hidden_dim = cfg["critic_hidden_dim"]
-        self.critic_step_size = cfg["critic_step_size"]
-        self.critic_lr = cfg["critic_lr"]
 
         self.discount_factor = cfg["discount_factor"]
         self.tau = cfg["tau"]
@@ -49,10 +43,10 @@ class MovieRecommender:
         self.workspace = Path(cfg["workspace"])
 
         # -- Setup data
-        self.users = self.env.users()
-        self.items = self.env.items()
-        self.num_users = self.env.num_users()
-        self.num_items = self.env.num_items()
+        self.users = self.env.users
+        self.items = self.env.items
+        self.num_users = self.env.num_users
+        self.num_items = self.env.num_items
 
         self.user_embeddings = DummyEmbedding(self.dim)
         self.item_embeddings = DummyEmbedding(self.dim)
@@ -72,25 +66,24 @@ class MovieRecommender:
         # input of actor is the state module output
         # output of it is the embedding dim
         # Fig 3 in the paper
-        self.actor = Actor(
-            input_dim=self.drr_output_dim,
-            hidden_dim=self.actor_hidden_dim,
-            output_dim=self.dim,
-            state_size=self.state_size,
-            tau=self.tau,
-            lr=self.actor_lr,
-            step_size=self.actor_step_size,
+        self.cfg["actor"].update(
+            {
+                "input_dim": self.drr_output_dim,
+                "output_dim": self.dim,
+                "tau": self.cfg["tau"],
+            }
+        )
+        self.actor = Actor.from_config(self.cfg["actor"])
+
+        self.cfg["critic"].update(
+            {
+                "input_action_dim": self.dim,
+                "input_state_dim": self.drr_output_dim,
+                "tau": self.tau,
+            }
         )
 
-        self.critic = Critic(
-            input_action_dim=self.dim,
-            input_state_dim=self.drr_output_dim,
-            embedding_dim=self.critic_action_emb_dim,
-            hidden_dim=self.critic_hidden_dim,
-            tau=self.tau,
-            step_size=self.critic_step_size,
-            lr=self.critic_lr,
-        )
+        self.critic = Critic.from_config(self.cfg["critic"])
 
     def recommend(self, action):
         """

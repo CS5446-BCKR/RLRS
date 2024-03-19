@@ -20,7 +20,7 @@ def test_loading_offline_env():
     assert env is not None
     assert env.database == db
     assert env.num_users == 4
-    assert set(env.users) == set([7, 8, 9, 10])
+    assert set(env.users.index) == set([7, 8, 9, 10])
     assert env.num_items == 6
     assert set(env.items.index) == set(range(10, 16))
 
@@ -33,7 +33,7 @@ def test_loading_specific_env():
 
     assert env.database == db
     assert env.num_users == 1
-    assert set(env.users) == set([9])
+    assert set(env.users.index) == set([9])
     assert env.num_items == 6
     assert set(env.items.index) == set(range(10, 16))
 

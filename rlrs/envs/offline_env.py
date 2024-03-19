@@ -132,7 +132,7 @@ class OfflineEnv:
         """
         Return all users in the env
         """
-        return self.avail_users
+        return self.db.users[self.db.users.index.isin(self.avail_users)]
 
     @property
     def items(self):

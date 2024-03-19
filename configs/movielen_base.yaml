@@ -4,18 +4,21 @@ device: cpu
 
 # Env settings
 state_size: 5
+rating_threshold: 3
 # embedding settings
 dim: 128
-# actor config
-actor_hidden_dim: 168
-actor_lr: 0.001
-actor_step_size: 50
+
+actor:
+  hidden_dim : 168
+  lr: 0.001
+  step_size: 50
 
 # critic config
-critic_action_emb_dim: 128
-critic_step_size: 50
-critic_hidden_dim: 168
-critic_lr: 0.001
+critic:
+  embedding_dim: 128
+  hidden_dim: 168
+  step_size: 50
+  lr: 0.001
 
 # DRR config
 # ...
@@ -31,5 +34,5 @@ std: 0.001
 # Training Settings
 tau: 0.001
 batch_size: 32
-M: 100
+M: 5
 workspace: workspace/test_0
