@@ -4,8 +4,9 @@ TODO: switch to pytorch tensor
 
 import random
 from collections import namedtuple
+from omegaconf import DictConfig
 
-import numpy as np
+import torch
 from trees import MinTree, SumTree
 
 BatchBufferPayload = namedtuple(
@@ -15,18 +16,26 @@ BatchBufferPayload = namedtuple(
 
 
 class PriorityExperienceReplay:
-    def __init__(self, buffer_size, embedding_dim):
+    def __init__(
+        self,
+        buffer_size,
+        state_dim,
+        action_dim,
+        max_priority=1.0,
+        alpha=0.6,
+        beta=0.4,
+        beta_constant=1e-5,
+    ):
         self.buffer_size = buffer_size
-        self.embedding_dim = embedding_dim
         self.crt_idx = 0
         self.is_full = False
 
         # setup buffers
-        self.states = np.zeros((buffer_size, 3 * embedding_dim), dtype=np.float32)
-        self.actions = np.zeros((buffer_size, embedding_dim), dtype=np.float32)
-        self.rewards = np.zeros((buffer_size,), dtype=np.float32)
-        self.next_states = np.zeros((buffer_size, 3 * embedding_dim), dtype=np.float32)
-        self.dones = np.zeros((buffer_size,), dtype=np.bool)
+        self.states = torch.zeros((buffer_size, state_dim), dtype=torch.float32)
+        self.actions = torch.zeros((buffer_size, action_dim), dtype=torch.float32)
+        self.rewards = torch.zeros((buffer_size,), dtype=torch.float32)
+        self.next_states = torch.zeros((buffer_size, state_dim), dtype=torch.float32)
+        self.dones = torch.zeros((buffer_size,), dtype=torch.bool)
 
         self.sum_tree = SumTree(buffer_size)
         self.min_tree = MinTree(buffer_size)
@@ -95,6 +104,6 @@ class PriorityExperienceReplay:
             self.rewards[rd_idx],
             self.next_states[rd_idx],
             self.dones[rd_idx],
-            np.array(weight_batch),
+            torch.array(weight_batch),
             index_batch,
         )
