@@ -26,6 +26,7 @@ class ActorModel(nn.Module):
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, output_dim),
+            nn.Tanh()
         ]
         self.layers = nn.Sequential(*self.layers)
 
@@ -77,7 +78,7 @@ class Actor(nn.Module):
         self.online_network.train()
         self.optim.zero_grad()
         outputs = self.online_network(inputs)
-        outputs.backward(-state_grads)
+        outputs.backward(-state_grads, retain_graph=True)
         self.optim.step()
         self.scheduler.step()
 

@@ -11,8 +11,8 @@ class DRRAve(nn.Module):
     def __init__(self, input_dim):
         super(DRRAve, self).__init__()
         self.input_dim = input_dim
-        # self.conv = nn.Conv1d(1, 1, kernel_size=1, bias=False)
-        self.conv = nn.Identity()
+        self.conv = nn.Conv1d(1, 1, kernel_size=1, bias=False)
+        # self.conv = nn.Identity()
         self.avg = nn.AdaptiveAvgPool1d(1)
         self.output_dim = 3 * input_dim
 

@@ -172,12 +172,12 @@ class MovieRecommender:
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
 
                 # train critic
-                critic_inputs = (payload.actions, payload.states)
+                critic_inputs = (payload.actions, payload.states.detach())
                 self.critic.fit(critic_inputs, TD_err.detach(), payload.weights)
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
-                self.actor.fit(payload.states, state_grads)
+                self.actor.fit(payload.states, state_grads.detach())
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()

@@ -11,7 +11,7 @@ dim: 128
 
 actor:
   hidden_dim : 168
-  lr: 0.1
+  lr: 0.001
   step_size: 50000
 
 # critic config
@@ -19,10 +19,7 @@ critic:
   embedding_dim: 128
   hidden_dim: 168
   step_size: 50000
-  lr: 0.1
-
-# DRR config
-# ...
+  lr: 0.001
 
 # MDP params
 discount_factor: 0.9
@@ -30,7 +27,7 @@ replay_memory_size: 1000000
 eps_priority: 1e-6
 eps: 1.0
 eps_decay: 0.000001
-std: 0.001
+std: 1.5
 
 # Training Settings
 tau: 0.001

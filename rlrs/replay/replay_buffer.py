@@ -50,7 +50,7 @@ class PriorityExperienceReplay:
         return self.crt_idx < 1 and not self.is_full
 
     def append(self, state, action, reward, next_state, done):
-        self.states[self.crt_idx] = state.detach()
+        self.states[self.crt_idx] = state
         self.actions[self.crt_idx] = action.detach()
         self.rewards[self.crt_idx] = reward
         self.next_states[self.crt_idx] = next_state.detach()
