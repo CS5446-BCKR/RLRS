@@ -107,8 +107,8 @@ class MovieRecommender:
         prev_items = init_state.prev_pos_items
         done = init_state.done
         logger.debug(f"Reset the env: {init_state=}")
+        user_emb = self.user_embeddings[user_id]
         while not done:  # Line 6
-            user_emb = self.user_embeddings[user_id]
             items_emb = self.item_embeddings[prev_items]
 
             # Line 7: Find the state via DRR
@@ -147,10 +147,12 @@ class MovieRecommender:
             if not self.buffer.empty():
                 logger.debug(f"Sample buffers: {self.batch_size}")
                 payload = self.buffer.sample(self.batch_size)
-                critic_inputs = (payload.actions, payload.next_states)
 
-                Q = self.critic.calcQ(critic_inputs, is_target=False)
-                Q_target = self.critic.calcQ(critic_inputs, is_target=True)
+                target_next_actions = self.actor.target_forward(payload.next_states)
+                critic_next_inputs = (target_next_actions.detach(), payload.next_states)
+
+                Q = self.critic.calcQ(critic_next_inputs, is_target=False)
+                Q_target = self.critic.calcQ(critic_next_inputs, is_target=True)
 
                 # Clipped Double Q-learn
                 Q_min = torch.min(torch.hstack((Q, Q_target)), dim=-1)[0]
@@ -233,9 +235,7 @@ class MovieRecommender:
 
 # Line 11 In PER paper
 def calc_TD_error(reward, Q, dones, discount_factor):
-    Q_target = torch.zeros_like(Q)
-    Q_target = reward + (1.0 - dones.float()) * (discount_factor * Q)
-    return Q_target
+    return reward + (1.0 - dones.float()) * (discount_factor * Q)
 
 
 def calc_Q(network: Critic, action, state, is_target=False):
