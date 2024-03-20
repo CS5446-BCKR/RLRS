@@ -2,7 +2,7 @@
 Modeling
 
 TODO:
- - Move training code to other place. 
+ - Move training code to other place.
 """
 
 from typing import Optional
@@ -43,6 +43,7 @@ class MovieRecommender:
         # -- Other training setting
         self.M = cfg["M"]
         self.workspace = Path(cfg["workspace"])
+        self.workspace.makedirs_p()
 
         # -- Setup data
         self.users = self.env.users
@@ -130,10 +131,12 @@ class MovieRecommender:
             # Line 10: Calculate the reward and the next state
             next_user_state = self.env.step(recommended_items)
             reward = next_user_state.reward
+            done = next_user_state.done
             logger.debug(f"Reward from rec items: {reward}")
 
             # Line 11 Get representation of the next state
             next_item_embs = self.item_embeddings[next_user_state.prev_pos_items]
+            logger.debug(f"Previous positive items: {next_user_state.prev_pos_items}")
             next_state_inputs = (user_emb, next_item_embs)
             next_state = self.drr_ave(next_state_inputs)
 
@@ -174,7 +177,7 @@ class MovieRecommender:
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
-                self.actor.fit(payload.states.detach(), state_grads.detach())
+                self.actor.fit(payload.states, state_grads)
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()
@@ -200,7 +203,7 @@ class MovieRecommender:
         for episode in range(self.M):
             logger.debug(f"Start episode #{episode}")
             episode_reward = self.train_on_episode()
-            print(f"Episode reward: {episode_reward}")
+            logger.debug(f"Episode reward: {episode_reward}")
 
             # saving model
             self.save()

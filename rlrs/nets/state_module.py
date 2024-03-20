@@ -12,6 +12,7 @@ class DRRAve(nn.Module):
         super(DRRAve, self).__init__()
         self.input_dim = input_dim
         # self.conv = nn.Conv1d(1, 1, kernel_size=1, bias=False)
+        self.conv = nn.Identity()
         self.avg = nn.AdaptiveAvgPool1d(1)
         self.output_dim = 3 * input_dim
 
@@ -24,6 +25,7 @@ class DRRAve(nn.Module):
         user, items = inputs
         if len(items.size()) == 2:
             items = items.unsqueeze(1)
+        items = self.conv(items)
         history = self.avg(items.permute(2, 1, 0)).squeeze()
         interaction = user * history
         return torch.cat((user, interaction, history), -1)

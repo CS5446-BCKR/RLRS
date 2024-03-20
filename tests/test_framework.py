@@ -17,6 +17,7 @@ def recommender():
         state_size=cfg["state_size"],
         rating_threshold=cfg["rating_threshold"],
         user_id=1,
+        done_count=40,
     )
     return MovieRecommender(env, cfg)
 

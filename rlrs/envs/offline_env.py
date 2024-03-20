@@ -105,8 +105,9 @@ class OfflineEnv:
                 # false positive
                 rewards.append(NEGATIVE_REWARD)
             self.recommended_items.add(item)
+
         self.prev_positive_items = (
-            self.prev_positive_items[-len(true_positives) :] + true_positives
+            self.prev_positive_items[len(true_positives) :] + true_positives
         )
 
         n_rec_items = len(self.recommended_items)
