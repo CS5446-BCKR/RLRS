@@ -22,3 +22,8 @@ make test
 ```bash
 make fmt
 ```
+
+## Debugging Training
+```bash
+make test-train
+```
