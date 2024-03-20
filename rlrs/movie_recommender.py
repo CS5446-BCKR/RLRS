@@ -147,20 +147,10 @@ class MovieRecommender:
             if not self.buffer.empty():
                 logger.debug(f"Sample buffers: {self.batch_size}")
                 payload = self.buffer.sample(self.batch_size)
+                critic_inputs = (payload.actions, payload.next_states)
 
-                Q = calc_Q(
-                    self.critic,
-                    payload.actions,
-                    payload.next_states,
-                    is_target=False,
-                )
-
-                Q_target = calc_Q(
-                    self.critic,
-                    payload.actions,
-                    payload.next_states,
-                    is_target=True,
-                )
+                Q = self.critic.calcQ(critic_inputs, is_target=False)
+                Q_target = self.critic.calcQ(critic_inputs, is_target=True)
 
                 # Clipped Double Q-learn
                 Q_min = torch.min(torch.hstack((Q, Q_target)), dim=-1)[0]
@@ -177,8 +167,7 @@ class MovieRecommender:
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
 
                 # train critic
-                critic_inputs = (payload.actions.detach(),
-                                 payload.states.detach())
+                critic_inputs = (payload.actions, payload.states)
                 self.critic.fit(critic_inputs, TD_err.detach(),
                                 payload.weights)
 

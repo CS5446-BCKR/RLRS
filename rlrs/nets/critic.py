@@ -117,6 +117,11 @@ class Critic(nn.Module):
     def target_forward(self, inputs):
         return self.target(inputs)
 
+    def calcQ(self, inputs, is_target: bool = False):
+        if is_target:
+            return self.target_forward(inputs)
+        return self.online_network(inputs)
+
     def save(self, save_path: Path):
         torch.save(
             {
