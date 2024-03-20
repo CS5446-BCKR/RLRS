@@ -170,8 +170,7 @@ class MovieRecommender:
 
                 # train critic
                 critic_inputs = (payload.actions, payload.states)
-                self.critic.fit(critic_inputs, TD_err.detach(),
-                                payload.weights)
+                self.critic.fit(critic_inputs, TD_err.detach(), payload.weights)
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
