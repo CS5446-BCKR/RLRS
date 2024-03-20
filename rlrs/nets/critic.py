@@ -9,6 +9,7 @@ from path import Path
 from torch import nn
 from torch.autograd import grad
 from torch.optim import Adam, lr_scheduler
+from loguru import logger
 
 from .utils import soft_replace_update, weighted_mse_loss
 
@@ -92,6 +93,7 @@ class Critic(nn.Module):
         self.optim.zero_grad()
         outputs = self.online_network(inputs)
         loss = weighted_mse_loss(outputs, y, weights)
+        logger.debug(f"Online Critic Loss: {loss.item()}")
         loss.backward()
         self.optim.step()
         self.scheduler.step()

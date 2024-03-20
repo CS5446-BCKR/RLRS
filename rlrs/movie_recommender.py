@@ -9,6 +9,7 @@ from typing import Optional
 
 import numpy as np
 import torch
+from loguru import logger
 from omegaconf import DictConfig
 from path import Path
 
@@ -24,6 +25,7 @@ class MovieRecommender:
     def __init__(self, env: OfflineEnv, cfg: DictConfig):
         self.env = env
         self.cfg = cfg
+        self.topk = cfg["topk"]
         self.dim = cfg["dim"]
         self.state_size = cfg["state_size"]
 
@@ -94,18 +96,18 @@ class MovieRecommender:
         # Nx D * Dx1
         scores = torch.mm(self.item_embeddings.all, action[:, None])
         indices = torch.argsort(scores.squeeze(), descending=True).squeeze()
+        indices = indices[: self.topk]
         return self.items.iloc[indices.numpy()].index
 
     def train_on_episode(self):
         episode_reward = 0
         # 3. (Line 5) observe the initial state
-        print("Line 5")
         init_state = self.env.reset()
         user_id = init_state.user_id
         prev_items = init_state.prev_pos_items
         done = init_state.done
+        logger.debug(f"Reset the env: {init_state=}")
         while not done:  # Line 6
-            print("Line 6")
             user_emb = self.user_embeddings[user_id]
             items_emb = self.item_embeddings[prev_items]
 
@@ -113,9 +115,9 @@ class MovieRecommender:
             drr_inputs = (user_emb, items_emb)
             state = self.drr_ave(drr_inputs)
 
-            # Line 8: Find the action based on the curernt policy
+            # Line 8: Find the action based on the current policy
             action = self.actor(state)
-            print("Line 8")
+            action = action.detach()
             # and apply epsilon-greedy exploration
             if self.eps > np.random.uniform():
                 self.eps -= self.eps_decay
@@ -123,28 +125,27 @@ class MovieRecommender:
 
             # Line 9: Recommend the new item
             recommended_items = self.recommend(action)
-            print("Line 9")
+            logger.debug(f"Recommended items: {recommended_items}")
 
             # Line 10: Calculate the reward and the next state
             next_user_state = self.env.step(recommended_items)
             reward = next_user_state.reward
-            print("Line 10")
+            logger.debug(f"Reward from rec items: {reward}")
 
             # Line 11 Get representation of the next state
             next_item_embs = self.item_embeddings[next_user_state.prev_pos_items]
             next_state_inputs = (user_emb, next_item_embs)
             next_state = self.drr_ave(next_state_inputs)
-            print("Line 11")
 
             # Line 12: Update the buffer
             self.buffer.append(state, action, reward, next_state, done)
-            print("Line 12")
 
             # Line 13: Sample a minibatch of N transitions
             # with **prioritized experience replay sampling**
             # Paper: https://arxiv.org/pdf/1511.05952.pdf)
             # Algorithm 1
             if not self.buffer.empty():
+                logger.debug(f"Sample buffers: {self.batch_size}")
                 payload = self.buffer.sample(self.batch_size)
 
                 Q = calc_Q(
@@ -170,30 +171,28 @@ class MovieRecommender:
                     payload.dones,
                     self.discount_factor,
                 )
-                print("Line 13")
 
                 # Update the buffer
                 for p, i in zip(TD_err, payload.indexes):
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
-                print("Line 13: Update Buffer")
 
                 # train critic
-                critic_inputs = (payload.actions.detach(), payload.states.detach())
-                self.critic.fit(critic_inputs, TD_err.detach(), payload.weights)
-                print("Line 13: Train critic")
+                critic_inputs = (payload.actions.detach(),
+                                 payload.states.detach())
+                self.critic.fit(critic_inputs, TD_err.detach(),
+                                payload.weights)
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
                 self.actor.fit(payload.states.detach(), state_grads.detach())
-                print("Line 13: Train actor")
                 # soft update strategy
                 self.critic.update_target()
                 self.actor.update_target()
-                print("Line 13: soft Update strategies")
 
             # move to the next state
             prev_items = next_user_state.prev_pos_items
             episode_reward += next_user_state.reward
+            logger.debug(f"Episode Reward: {episode_reward}")
         return episode_reward
 
     def train(self):
@@ -209,6 +208,7 @@ class MovieRecommender:
         )
 
         for episode in range(self.M):
+            logger.debug(f"Start episode #{episode}")
             episode_reward = self.train_on_episode()
             print(f"Episode reward: {episode_reward}")
 

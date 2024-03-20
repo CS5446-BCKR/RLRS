@@ -5,20 +5,21 @@ device: cpu
 # Env settings
 state_size: 5
 rating_threshold: 3
+topk: 10
 # embedding settings
 dim: 128
 
 actor:
   hidden_dim : 168
-  lr: 0.001
-  step_size: 50
+  lr: 0.1
+  step_size: 50000
 
 # critic config
 critic:
   embedding_dim: 128
   hidden_dim: 168
-  step_size: 50
-  lr: 0.001
+  step_size: 50000
+  lr: 0.1
 
 # DRR config
 # ...

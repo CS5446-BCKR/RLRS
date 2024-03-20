@@ -47,7 +47,7 @@ class PriorityExperienceReplay:
         self.beta_constant = 1e-5
 
     def empty(self):
-        return self.crt_idx <= 1 and not self.is_full
+        return self.crt_idx < 1 and not self.is_full
 
     def append(self, state, action, reward, next_state, done):
         self.states[self.crt_idx] = state

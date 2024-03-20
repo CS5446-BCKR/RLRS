@@ -5,7 +5,7 @@ import numpy as np
 
 from rlrs.datasets.movielens import MovieLens
 
-DEFAULT_DONE_COUNT = 3000
+DEFAULT_DONE_COUNT = 100
 NEGATIVE_REWARD = -0.5
 
 UserStateInfo = namedtuple(
@@ -66,7 +66,8 @@ class OfflineEnv:
 
         # historical positive items
 
-        self.prev_positive_items = self.positive_items[: self.state_size].tolist()
+        self.prev_positive_items = self.positive_items[: self.state_size].tolist(
+        )
         # assuming all previous items are recommended by the agent
         self.recommended_items = set(self.prev_positive_items)
         self.done = len(self.prev_positive_items) == 0
@@ -106,7 +107,7 @@ class OfflineEnv:
                 rewards.append(NEGATIVE_REWARD)
             self.recommended_items.add(item)
         self.prev_positive_items = (
-            self.prev_positive_items[-len(true_positives) :] + true_positives
+            self.prev_positive_items[-len(true_positives):] + true_positives
         )
 
         n_rec_items = len(self.recommended_items)
