@@ -93,7 +93,7 @@ class Critic(nn.Module):
         self.optim.zero_grad()
         outputs = self.online_network(inputs)
         loss = weighted_mse_loss(outputs, y, weights)
-        logger.debug(f"Online Critic Loss: {loss.item()}")
+        logger.debug(f"Online Critic Loss: {loss.item():.4f}")
         loss.backward()
         self.optim.step()
         self.scheduler.step()

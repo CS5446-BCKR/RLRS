@@ -129,7 +129,7 @@ class MovieRecommender:
 
             # Line 9: Recommend the new item
             recommended_items = self.recommend(action)
-            logger.debug(f"Recommended items: {recommended_items}")
+            logger.debug(f"Recommended items: {recommended_items.values}")
 
             # Line 10: Calculate the reward and the next state
             next_user_state = self.env.step(recommended_items)
