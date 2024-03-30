@@ -26,7 +26,10 @@ class MovieRecommender:
         self.env = env
         self.cfg = cfg
         self.topk = cfg["topk"]
-        self.dim = cfg["dim"]
+        user_emb_cfg = cfg["user_embedding"]
+        item_emb_cfg = cfg["item_embedding"]
+        assert user_emb_cfg["dim"] == item_emb_cfg["dim"]
+        self.dim = item_emb_cfg["dim"]
         self.state_size = cfg["state_size"]
 
         self.discount_factor = cfg["discount_factor"]
