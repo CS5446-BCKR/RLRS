@@ -27,3 +27,13 @@ make fmt
 ```bash
 make test-train
 ```
+
+## Loss Visualization
+
+1. Start mlflow server:
+
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
+
+Open `127.0.0.1:8080` to view MLflow, choose `Experiments`, select the run, click on **Model Metrics** tab to see all losses, metrics.

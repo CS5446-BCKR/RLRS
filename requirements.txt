@@ -10,3 +10,4 @@ omegaconf
 pytest
 isort
 loguru
+mlflow

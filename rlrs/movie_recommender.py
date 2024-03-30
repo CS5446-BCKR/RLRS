@@ -12,6 +12,8 @@ import torch
 from loguru import logger
 from omegaconf import DictConfig
 from path import Path
+import mlflow
+from datetime import datetime
 
 from rlrs.embeddings import embedding_factory
 from rlrs.envs.offline_env import OfflineEnv
@@ -103,7 +105,7 @@ class MovieRecommender:
         indices = indices[: self.topk]
         return self.items.iloc[indices.numpy()].index
 
-    def train_on_episode(self):
+    def train_on_episode(self, iter_count):
         episode_reward = 0
         # 3. (Line 5) observe the initial state
         init_state = self.env.reset()
@@ -113,6 +115,8 @@ class MovieRecommender:
         logger.debug(f"Reset the env: {init_state=}")
         user_emb = self.user_embeddings[user_id]
         while not done:  # Line 6
+            iter_count += 1
+            logger.debug(f"Iteration: {iter_count}")
             items_emb = self.item_embeddings[prev_items]
 
             # Line 7: Find the state via DRR
@@ -136,6 +140,7 @@ class MovieRecommender:
             reward = next_user_state.reward
             done = next_user_state.done
             logger.debug(f"Reward from rec items: {reward}")
+            mlflow.log_metric("reward_rec_items", reward, step=iter_count)
 
             # Line 11 Get representation of the next state
             next_item_embs = self.item_embeddings[next_user_state.prev_pos_items]
@@ -188,8 +193,9 @@ class MovieRecommender:
             # move to the next state
             prev_items = next_user_state.prev_pos_items
             episode_reward += next_user_state.reward
-            logger.debug(f"Episode Reward: {episode_reward}")
-        return episode_reward
+        logger.debug(f"Episode Reward: {episode_reward}")
+        mlflow.log_metric("episode_reward", episode_reward, step=iter_count)
+        return iter_count
 
     def train(self):
         # 1. Initialize networks
@@ -202,13 +208,16 @@ class MovieRecommender:
             state_dim=self.drr_output_dim,
             action_dim=self.dim,
         )
-
-        for episode in range(self.M):
-            logger.debug(f"Start episode #{episode}")
-            episode_reward = self.train_on_episode()
-            logger.debug(f"Episode reward: {episode_reward}")
-
-            self.save(f"ep_{episode}")
+        mlflow.set_tracking_uri(uri="http://127.0.0.1:8080")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        mlflow.set_experiment(f"Movie Recommender: {now}")
+        iter_count = 0
+        with mlflow.start_run():
+            mlflow.log_params(self.cfg)
+            for episode in range(self.M):
+                logger.debug(f"Start episode #{episode}")
+                iter_count = self.train_on_episode(iter_count)
+                self.save(f"ep_{episode}")
 
     def _get_checkpoint_sub(self, subdir: Optional[Path] = None):
         path = self.workspace
