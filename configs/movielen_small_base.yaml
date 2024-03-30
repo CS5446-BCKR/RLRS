@@ -9,11 +9,11 @@ topk: 10
 # embedding settings
 user_embedding:
   name: dummy
-  dim: 128
+  dim: 32
 
 item_embedding:
   name: dummy
-  dim: 128
+  dim: 32
 
 actor:
   hidden_dim : 168
@@ -37,6 +37,6 @@ std: 1.5
 
 # Training Settings
 tau: 0.001
-batch_size: 32
+batch_size: 8
 M: 5
 workspace: workspace/test_0
