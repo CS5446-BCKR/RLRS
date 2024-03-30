@@ -7,7 +7,13 @@ state_size: 5
 rating_threshold: 3
 topk: 10
 # embedding settings
-dim: 128
+user_embedding:
+  name: dummy
+  dim: 128
+
+item_embedding:
+  name: dummy
+  dim: 128
 
 actor:
   hidden_dim : 168

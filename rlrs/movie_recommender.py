@@ -13,7 +13,7 @@ from loguru import logger
 from omegaconf import DictConfig
 from path import Path
 
-from rlrs.embeddings.base import DummyEmbedding
+from rlrs.embeddings import embedding_factory
 from rlrs.envs.offline_env import OfflineEnv
 from rlrs.nets.actor import Actor
 from rlrs.nets.critic import Critic
@@ -51,8 +51,8 @@ class MovieRecommender:
         self.num_users = self.env.num_users
         self.num_items = self.env.num_items
 
-        self.user_embeddings = DummyEmbedding(self.dim)
-        self.item_embeddings = DummyEmbedding(self.dim)
+        self.user_embeddings = embedding_factory(cfg["user_embedding"])
+        self.item_embeddings = embedding_factory(cfg["item_embedding"])
 
         # Extract the embeddings
         self.user_embeddings.fit(self.users)
@@ -205,13 +205,13 @@ class MovieRecommender:
             episode_reward = self.train_on_episode()
             logger.debug(f"Episode reward: {episode_reward}")
 
-            # saving model
-            self.save()
+            self.save(f"ep_{episode}")
 
     def _get_checkpoint_sub(self, subdir: Optional[Path] = None):
         path = self.workspace
         if subdir is not None:
             path = path / subdir
+        path.makedirs_p()
         return path
 
     def get_actor_checkpoint(self, subdir: Optional[Path] = None):
