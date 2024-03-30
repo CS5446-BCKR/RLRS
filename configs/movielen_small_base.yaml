@@ -1,0 +1,42 @@
+
+input_data: data/ml-small-csv
+device: cpu
+
+# Env settings
+state_size: 5
+rating_threshold: 4
+topk: 10
+# embedding settings
+user_embedding:
+  name: dummy
+  dim: 128
+
+item_embedding:
+  name: dummy
+  dim: 128
+
+actor:
+  hidden_dim : 168
+  lr: 0.001
+  step_size: 50000
+
+# critic config
+critic:
+  embedding_dim: 128
+  hidden_dim: 168
+  step_size: 50000
+  lr: 0.001
+
+# MDP params
+discount_factor: 0.9
+replay_memory_size: 1000000
+eps_priority: 1e-6
+eps: 1.0
+eps_decay: 0.000001
+std: 1.5
+
+# Training Settings
+tau: 0.001
+batch_size: 32
+M: 5
+workspace: workspace/test_0

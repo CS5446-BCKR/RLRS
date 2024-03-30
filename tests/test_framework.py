@@ -5,7 +5,7 @@ from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.offline_env import OfflineEnv
 from rlrs.movie_recommender import MovieRecommender
 
-CFG = "configs/movielen_base.yaml"
+CFG = "configs/movielen_small_base.yaml"
 
 
 @fixture
@@ -16,7 +16,7 @@ def recommender():
         dataset,
         state_size=cfg["state_size"],
         rating_threshold=cfg["rating_threshold"],
-        user_id=1,
+        user_id=2,
         done_count=40,
     )
     return MovieRecommender(env, cfg)
