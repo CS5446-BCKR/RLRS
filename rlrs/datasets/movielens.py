@@ -52,6 +52,11 @@ class MovieLens:
     def get_user_history_length(self, user):
         return len(self.ratings[self.ratings[USER_IDX_COL] == user])
 
+    def get_positive_items(self, user, **kwargs):
+        thres = kwargs["rating_threshold"]
+        res = self.ratings.query(f"UserID == {user} and Rating >= {thres}")
+        return res.MovieID.values
+
     @classmethod
     def from_folder(cls, src: Path):
         src = Path(src)

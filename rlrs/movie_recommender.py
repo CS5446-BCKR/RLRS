@@ -5,15 +5,15 @@ TODO:
  - Move training code to other place.
 """
 
+from datetime import datetime
 from typing import Optional
 
+import mlflow
 import numpy as np
 import torch
 from loguru import logger
 from omegaconf import DictConfig
 from path import Path
-import mlflow
-from datetime import datetime
 
 from rlrs.embeddings import embedding_factory
 from rlrs.envs.offline_env import OfflineEnv
@@ -120,12 +120,10 @@ class MovieRecommender:
             items_emb = self.item_embeddings[prev_items]
 
             # Line 7: Find the state via DRR
-            drr_inputs = (user_emb, items_emb)
-            state = self.drr_ave(drr_inputs)
+            state = self.drr_ave((user_emb, items_emb))
 
             # Line 8: Find the action based on the current policy
-            action = self.actor(state)
-            action = action.detach()
+            action = self.actor(state).detach()
             # and apply epsilon-greedy exploration
             if self.eps > np.random.uniform():
                 self.eps -= self.eps_decay

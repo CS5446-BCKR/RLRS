@@ -26,7 +26,7 @@ class ActorModel(nn.Module):
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, output_dim),
-            nn.Tanh()
+            nn.Tanh(),
         ]
         self.layers = nn.Sequential(*self.layers)
 

@@ -33,15 +33,13 @@ class OfflineEnv:
             self.avail_users = [user_id]
 
         self.user = None
-        self.reset()
-        assert self.user is not None
         self.done_count = done_count
 
     def reset(self) -> UserStateInfo:
         """
-        Reset the env.
-        Choose a specific user or randomly select from
-        a pool of users.
+        Reset the env:
+        1. Choose a specific user or randomly select from a pool of users.
+        2. Specify historical positive items (via state size)
         Recommended items : rated (>=4) movies.
 
         Returns:
@@ -52,17 +50,9 @@ class OfflineEnv:
                  4. Reward value
         """
         self.user = np.random.choice(self.avail_users)
-
-        ratings = self.db.get_ratings(self.user)
-
-        # TODO: generalize this
-        self.user_ratings = {
-            r.MovieID: r.Rating for r in ratings.itertuples(index=False)
-        }
-
-        self.positive_items = ratings[ratings.Rating >= self.rating_threshold][
-            self.db.item_col
-        ].values
+        self.positive_items = self.db.get_positive_items(
+            self.user, **{"rating_threshold": self.rating_threshold}
+        )
 
         # historical positive items
 
@@ -87,6 +77,7 @@ class OfflineEnv:
         # Use reward function from Epn 10 in the paper
         # For non-rating positive signal, may need to find
         # alternatives
+        assert self.user is not None
 
         true_positives = []
         rewards = []

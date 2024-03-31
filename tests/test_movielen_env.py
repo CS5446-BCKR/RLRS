@@ -79,10 +79,12 @@ def test_empty_historical_positive(neg_env):
 
 
 def test_env_step_positive_item(env):
+    env.reset()
     state = env.step([14])
     assert np.allclose(state.reward, 1.0)
 
 
 def test_env_step_negative_item(env):
+    env.reset()
     state = env.step([13])
     assert np.allclose(state.reward, -0.5)

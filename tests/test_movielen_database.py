@@ -65,3 +65,8 @@ def test_item_col(db):
 
 def test_user_col(db):
     assert db.user_col == USER_IDX_COL
+
+
+def test_get_positive_ratings(db):
+    ratings = db.get_positive_items(9, **{"rating_threshold": 3})
+    assert all(ratings == [15, 11, 14, 14])
