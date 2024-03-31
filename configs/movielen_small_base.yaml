@@ -4,28 +4,28 @@ device: cpu
 
 # Env settings
 state_size: 5
-rating_threshold: 4
-topk: 10
+rating_threshold: 5
+topk: 5
 # embedding settings
 user_embedding:
   name: dummy
-  dim: 32
+  dim: 8
 
 item_embedding:
   name: dummy
-  dim: 32
+  dim: 8
 
 actor:
-  hidden_dim : 168
-  lr: 0.001
+  hidden_dim : 64
+  lr: 0.0001
   step_size: 50000
 
 # critic config
 critic:
-  embedding_dim: 128
-  hidden_dim: 168
+  embedding_dim: 32
+  hidden_dim: 64
   step_size: 50000
-  lr: 0.001
+  lr: 0.0001
 
 # MDP params
 discount_factor: 0.9
@@ -38,5 +38,5 @@ std: 1.5
 # Training Settings
 tau: 0.001
 batch_size: 8
-M: 5
+M: 20
 workspace: workspace/test_0
