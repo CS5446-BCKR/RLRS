@@ -18,7 +18,7 @@ from path import Path
 from rlrs.embeddings import embedding_factory
 from rlrs.envs.offline_env import OfflineEnv
 from rlrs.nets.actor import Actor
-from rlrs.nets.critic import Critic
+from rlrs.nets.critic import Critic, calc_Q_min, calc_TD_error
 from rlrs.nets.state_module import DRRAve
 from rlrs.replay.replay_buffer import PriorityExperienceReplay
 
@@ -154,32 +154,31 @@ class MovieRecommender:
             # Paper: https://arxiv.org/pdf/1511.05952.pdf)
             # Algorithm 1
             if not self.buffer.empty():
-                logger.debug(f"Sample buffers: {self.batch_size}")
                 payload = self.buffer.sample(self.batch_size)
 
                 target_next_actions = self.actor.target_forward(payload.next_states)
                 critic_next_inputs = (target_next_actions.detach(), payload.next_states)
 
-                Q = self.critic.calcQ(critic_next_inputs, is_target=False)
-                Q_target = self.critic.calcQ(critic_next_inputs, is_target=True)
-
-                # Clipped Double Q-learn
-                Q_min = torch.min(torch.hstack((Q, Q_target)), dim=-1)[0]
+                Q_min = calc_Q_min(self.critic, critic_next_inputs)
 
                 TD_err = calc_TD_error(
                     payload.rewards,
                     Q_min,
                     payload.dones,
                     self.discount_factor,
-                )
+                ).detach()
 
                 # Update the buffer
                 for p, i in zip(TD_err, payload.indexes):
                     self.buffer.update_priority(abs(p) + self.eps_priority, i)
 
                 # train critic
-                critic_inputs = (payload.actions, payload.states.detach())
-                self.critic.fit(critic_inputs, TD_err.detach(), payload.weights)
+                critic_inputs = (payload.actions.detach(), payload.states.detach())
+                critic_loss = self.critic.fit(
+                    critic_inputs, TD_err, payload.weights
+                )
+                mlflow.log_metric("critic_loss", critic_loss, step=iter_count)
+                logger.debug(f"Online critic loss: {critic_loss}")
 
                 state_grads = self.critic.dq_da(critic_inputs)
                 # train actor
@@ -245,13 +244,3 @@ class MovieRecommender:
         self.critic.load(critic_checkpoint)
 
 
-# Line 11 In PER paper
-def calc_TD_error(reward, Q, dones, discount_factor):
-    return reward + (1.0 - dones.float()) * (discount_factor * Q)
-
-
-def calc_Q(network: Critic, action, state, is_target=False):
-    inputs = (action, state)
-    if is_target:
-        return network.target_forward(inputs)
-    return network.forward(inputs)

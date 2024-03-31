@@ -55,7 +55,6 @@ class OfflineEnv:
         )
 
         # historical positive items
-
         self.prev_positive_items = self.positive_items[: self.state_size].tolist()
         # assuming all previous items are recommended by the agent
         self.recommended_items = set(self.prev_positive_items)

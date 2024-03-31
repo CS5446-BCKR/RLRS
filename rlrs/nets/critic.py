@@ -93,10 +93,10 @@ class Critic(nn.Module):
         self.optim.zero_grad()
         outputs = self.online_network(inputs)
         loss = weighted_mse_loss(outputs, y, weights)
-        logger.debug(f"Online Critic Loss: {loss.item():.4f}")
         loss.backward()
         self.optim.step()
         self.scheduler.step()
+        return loss.item()
 
     def dq_da(self, inputs):
         """
@@ -169,3 +169,24 @@ class Critic(nn.Module):
             lr=cfg["lr"],
             step_size=cfg["step_size"],
         )
+
+
+# Line 11 In PER paper
+def calc_TD_error(reward, Q, dones, discount_factor):
+    return reward + (1.0 - dones.float()) * (discount_factor * Q)
+
+
+def calc_Q(network: Critic, action, state, is_target=False):
+    inputs = (action, state)
+    if is_target:
+        return network.target_forward(inputs)
+    return network.forward(inputs)
+
+
+def calc_Q_min(network: Critic, next_inputs):
+    Q = network.calcQ(next_inputs, is_target=False)
+    Q_target = network.calcQ(next_inputs, is_target=True)
+
+    # Clipped Double Q-learn
+    Q_min = torch.min(torch.hstack((Q, Q_target)), dim=-1)[0]
+    return Q_min
