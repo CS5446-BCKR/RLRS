@@ -8,3 +8,6 @@ test:
 
 test-train:
 	pytest tests/test_framework.py -k "test_train_framework" --capture=no
+
+mlflow:
+	mlflow server --host 127.0.0.1 --port 8080
