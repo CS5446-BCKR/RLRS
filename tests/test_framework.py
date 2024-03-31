@@ -1,11 +1,20 @@
 from omegaconf import OmegaConf
 from pytest import fixture
 
+import torch
+import random
+import numpy as np
+
 from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.offline_env import OfflineEnv
 from rlrs.movie_recommender import MovieRecommender
 
 CFG = "configs/movielen_small_base.yaml"
+SEED = 42
+
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+random.seed(SEED)
 
 
 @fixture
