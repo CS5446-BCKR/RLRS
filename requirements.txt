@@ -11,3 +11,4 @@ pytest
 isort
 loguru
 mlflow
+pytest-skip-slow

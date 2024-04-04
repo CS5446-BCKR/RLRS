@@ -1,4 +1,5 @@
 from omegaconf import OmegaConf
+import pytest
 from pytest import fixture
 
 import torch
@@ -36,5 +37,6 @@ def test_init_framework(recommender):
     recommender is not None
 
 
+@pytest.mark.slow
 def test_train_framework(recommender):
     recommender.train()
