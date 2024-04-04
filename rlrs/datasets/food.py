@@ -2,6 +2,11 @@ from pathlib import Path
 
 import pandas as pd
 
+USER_IDX_COL = "" #user_id
+ITEM_IDX_COL = "" #item_id
+ORDER_FREQ_COL = "frequency" # equivalent to rating
+TIMESTAMP_COL = "Timestamp" 
+
 
 class Food:
 
@@ -22,9 +27,6 @@ class Food:
         self.UserItems: pd.DataFrame = UserItems # equivalent of ratings table in movielens
 
         self.idToMenuItem = self.menuItems.set_index("id").to_dict("index")
-        self.idToModGroup = self.modGroups.set_index("id").to_dict("index")
-        self.idToModItem = self.modItems.set_index("id").to_dict("index")
-        self.idToOrder = self.orders.set_index("order_id").to_dict("index")
 
     @classmethod
     def from_folder(cls, src: Path):
