@@ -174,9 +174,7 @@ class MovieRecommender:
 
                 # train critic
                 critic_inputs = (payload.actions.detach(), payload.states.detach())
-                critic_loss = self.critic.fit(
-                    critic_inputs, TD_err, payload.weights
-                )
+                critic_loss = self.critic.fit(critic_inputs, TD_err, payload.weights)
                 mlflow.log_metric("critic_loss", critic_loss, step=iter_count)
                 logger.debug(f"Online critic loss: {critic_loss}")
 
@@ -242,5 +240,3 @@ class MovieRecommender:
         self.actor.load(actor_checkpoint)
         critic_checkpoint = self.get_critic_checkpoint(subdir)
         self.critic.load(critic_checkpoint)
-
-

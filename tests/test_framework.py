@@ -1,10 +1,10 @@
-from omegaconf import OmegaConf
-import pytest
-from pytest import fixture
-
-import torch
 import random
+
 import numpy as np
+import pytest
+import torch
+from omegaconf import OmegaConf
+from pytest import fixture
 
 from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.offline_env import OfflineEnv

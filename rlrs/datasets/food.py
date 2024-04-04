@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pandas as pd
 
-USER_IDX_COL = "" #user_id
-ITEM_IDX_COL = "" #item_id
-ORDER_FREQ_COL = "frequency" # equivalent to rating
-TIMESTAMP_COL = "Timestamp" 
+USER_IDX_COL = ""  # user_id
+ITEM_IDX_COL = ""  # item_id
+ORDER_FREQ_COL = "frequency"  # equivalent to rating
+TIMESTAMP_COL = "Timestamp"
 
 
 class Food:
@@ -24,7 +24,9 @@ class Food:
         self.modItems: pd.DataFrame = modItems
         self.orders: pd.DataFrame = orders
         self.orderItems: pd.DataFrame = orderItems
-        self.UserItems: pd.DataFrame = UserItems # equivalent of ratings table in movielens
+        self.UserItems: pd.DataFrame = (
+            UserItems  # equivalent of ratings table in movielens
+        )
 
         self.idToMenuItem = self.menuItems.set_index("id").to_dict("index")
 
