@@ -12,12 +12,14 @@ class Food:
         modItems: pd.DataFrame,
         orders: pd.DataFrame,
         orderItems: pd.DataFrame,
+        UserItems: pd.DataFrame,
     ):
         self.menuItems: pd.DataFrame = menuItems
         self.modGroups: pd.DataFrame = modGroups
         self.modItems: pd.DataFrame = modItems
         self.orders: pd.DataFrame = orders
         self.orderItems: pd.DataFrame = orderItems
+        self.UserItems: pd.DataFrame = UserItems # equivalent of ratings table in movielens
 
         self.idToMenuItem = self.menuItems.set_index("id").to_dict("index")
         self.idToModGroup = self.modGroups.set_index("id").to_dict("index")
@@ -32,6 +34,7 @@ class Food:
             pd.read_csv(src / "mod_items.csv"),
             pd.read_csv(src / "orders.csv", dtype=str, keep_default_na=False),
             pd.read_csv(src / "order_items.csv"),
+            pd.read_csv(src / "user_item_frequency_table.csv"),
         )
 
 
