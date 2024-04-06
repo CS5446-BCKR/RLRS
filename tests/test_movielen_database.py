@@ -57,6 +57,12 @@ def test_items(db):
     assert db.items.index.name == MOVIE_IDX_COL
 
 
+def test_users(db):
+    assert db.users is not None
+    assert len(db.users) == 6
+    assert db.users.index.name == USER_IDX_COL
+
+
 def test_user_history_length(db):
     len = db.get_user_history_length(9)
     assert len == 5

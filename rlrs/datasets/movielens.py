@@ -23,7 +23,7 @@ class MovieLens(Dataset):
     ):
 
         self.movies: pd.DataFrame = movies.set_index(MOVIE_IDX_COL)
-        self.users: pd.DataFrame = users.set_index(USER_IDX_COL)
+        self.users_: pd.DataFrame = users.set_index(USER_IDX_COL)
         self.ratings: pd.DataFrame = ratings.sort_values(by=TIMESTAMP_COL)
 
         self.id2movies = self.movies.to_dict("index")
@@ -79,6 +79,10 @@ class MovieLens(Dataset):
     @property
     def items(self):
         return self.movies
+
+    @property
+    def users(self):
+        return self.users_
 
     @property
     def item_col(self) -> str:

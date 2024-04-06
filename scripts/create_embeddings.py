@@ -53,6 +53,8 @@ def main(
     with h5py.File(output_folder / "embeddings.h5", "w") as h5file:
         h5file.create_dataset("user_embedding", data=user_embeds)
         h5file.create_dataset("item_embedding", data=item_embeds)
+        h5file.create_dataset("user_index", data=dataset.users.index.values)
+        h5file.create_dataset("item_index", data=dataset.items.index.values)
 
 
 if __name__ == "__main__":
