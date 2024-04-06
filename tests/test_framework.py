@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from pytest import fixture
 
 from rlrs.datasets.movielens import MovieLens
-from rlrs.envs.offline_env import OfflineEnv
+from rlrs.envs.offline_env import MovieLenEnv
 from rlrs.movie_recommender import MovieRecommender
 
 CFG = "configs/movielen_small_base.yaml"
@@ -22,7 +22,7 @@ random.seed(SEED)
 def recommender():
     cfg = OmegaConf.load(CFG)
     dataset = MovieLens.from_folder(cfg["input_data"])
-    env = OfflineEnv(
+    env = MovieLenEnv(
         dataset,
         state_size=cfg["state_size"],
         rating_threshold=cfg["rating_threshold"],

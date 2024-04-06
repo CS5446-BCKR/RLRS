@@ -13,7 +13,7 @@ UserStateInfo = namedtuple(
 )
 
 
-class OfflineEnv:
+class MovieLenEnv:
     """ """
 
     def __init__(

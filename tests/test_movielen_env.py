@@ -2,7 +2,7 @@ import numpy as np
 from pytest import fixture
 
 from rlrs.datasets.movielens import MovieLens
-from rlrs.envs.offline_env import OfflineEnv
+from rlrs.envs.offline_env import MovieLenEnv
 
 TEST_DATA = "data/test_data/ml/"
 STATE_SIZE = 3
@@ -13,7 +13,7 @@ EMPTY_HIS_USER_ID = 7
 
 def test_loading_offline_env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
-    env: OfflineEnv = OfflineEnv(
+    env: MovieLenEnv = MovieLenEnv(
         db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD
     )
 
@@ -27,7 +27,7 @@ def test_loading_offline_env():
 
 def test_loading_specific_env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
-    env: OfflineEnv = OfflineEnv(
+    env: MovieLenEnv = MovieLenEnv(
         db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=USER_ID
     )
 
@@ -41,7 +41,7 @@ def test_loading_specific_env():
 @fixture
 def env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
-    env: OfflineEnv = OfflineEnv(
+    env: MovieLenEnv = MovieLenEnv(
         db, state_size=STATE_SIZE, rating_threshold=RATING_THRESHOLD, user_id=USER_ID
     )
     return env
@@ -50,7 +50,7 @@ def env():
 @fixture
 def neg_env():
     db: MovieLens = MovieLens.from_folder(TEST_DATA)
-    env: OfflineEnv = OfflineEnv(
+    env: MovieLenEnv = MovieLenEnv(
         db,
         state_size=STATE_SIZE,
         rating_threshold=RATING_THRESHOLD,

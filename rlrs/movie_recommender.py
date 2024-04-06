@@ -16,7 +16,7 @@ from omegaconf import DictConfig
 from path import Path
 
 from rlrs.embeddings import embedding_factory
-from rlrs.envs.offline_env import OfflineEnv
+from rlrs.envs.offline_env import MovieLenEnv
 from rlrs.nets.actor import Actor
 from rlrs.nets.critic import Critic, calc_Q_min, calc_TD_error
 from rlrs.nets.state_module import DRRAve
@@ -24,7 +24,7 @@ from rlrs.replay.replay_buffer import PriorityExperienceReplay
 
 
 class MovieRecommender:
-    def __init__(self, env: OfflineEnv, cfg: DictConfig):
+    def __init__(self, env: MovieLenEnv, cfg: DictConfig):
         self.env = env
         self.cfg = cfg
         self.topk = cfg["topk"]
