@@ -20,8 +20,6 @@ def test_dummy_embedding():
     assert isinstance(all, torch.Tensor)
     assert all.size() == (3, 5)
 
-    emb = embeds[[]]
-
 
 def test_pretrained_embedding():
     PATH = "data/test_data/embed_out/embeddings.h5"
