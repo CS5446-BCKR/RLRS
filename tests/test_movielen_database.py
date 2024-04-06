@@ -1,5 +1,6 @@
 from collections import Counter
 
+import numpy as np
 from pytest import fixture
 
 from rlrs.datasets.movielens import MOVIE_IDX_COL, USER_IDX_COL, MovieLens
@@ -46,6 +47,10 @@ def test_num_items(db):
     assert db.num_items == 6
 
 
+def test_num_users(db):
+    assert db.num_users == 6
+
+
 def test_items(db):
     assert db.items is not None
     assert len(db.items) == 6
@@ -70,3 +75,30 @@ def test_user_col(db):
 def test_get_positive_ratings(db):
     ratings = db.get_positive_items(9, **{"rating_threshold": 3})
     assert all(ratings == [15, 11, 14, 14])
+
+
+def test_rating_matrix(db):
+    config = {"rating_threshold": 3}
+    """
+MovieID   10   11   12   13   14   15
+UserID
+5        0.0  1.0  0.0  0.0  0.0  0.0
+6        0.0  0.0  0.0  0.0  0.0  0.0
+7        0.0  0.0  0.0  0.0  0.0  0.0
+8        0.0  0.0  1.0  0.0  1.0  0.0
+9        0.0  1.0  0.0  0.0  1.0  1.0
+10       1.0  1.0  0.0  0.0  0.0  0.0
+    """
+    matrix = db.get_rating_matrix(**config)
+    assert matrix.shape == (6, 6)
+    assert np.allclose(
+        matrix,
+        [
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 1.0, 1.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        ],
+    )

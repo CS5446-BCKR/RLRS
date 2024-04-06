@@ -8,13 +8,15 @@ import numpy as np
 import pandas as pd
 from path import Path
 
+from .base import Dataset
+
 USER_IDX_COL = "UserID"
 MOVIE_IDX_COL = "MovieID"
 RATING_COL = "Rating"
 TIMESTAMP_COL = "Timestamp"
 
 
-class MovieLens:
+class MovieLens(Dataset):
 
     def __init__(
         self, movies: pd.DataFrame, users: pd.DataFrame, ratings: pd.DataFrame
@@ -71,6 +73,10 @@ class MovieLens:
         return len(self.movies)
 
     @property
+    def num_users(self) -> int:
+        return len(self.users)
+
+    @property
     def items(self):
         return self.movies
 
@@ -81,3 +87,13 @@ class MovieLens:
     @property
     def user_col(self) -> str:
         return USER_IDX_COL
+
+    def get_rating_matrix(self, **kwargs):
+        dataframe = pd.DataFrame(
+            np.zeros((self.num_users, self.num_items)),
+            index=self.users.index,
+            columns=self.movies.index,
+        )
+        for index, row in dataframe.iterrows():
+            row[self.get_positive_items(index, **kwargs)] = 1.0
+        return dataframe.values
