@@ -5,6 +5,8 @@ import numpy as np
 
 from rlrs.datasets.movielens import MovieLens
 
+from .base import OfflineEnvBase
+
 DEFAULT_DONE_COUNT = 100
 NEGATIVE_REWARD = -0.5
 
@@ -13,7 +15,7 @@ UserStateInfo = namedtuple(
 )
 
 
-class MovieLenEnv:
+class MovieLenEnv(OfflineEnvBase):
     """ """
 
     def __init__(
@@ -109,32 +111,3 @@ class MovieLenEnv:
         return UserStateInfo(
             self.user, self.prev_positive_items, self.done, np.mean(rewards)
         )
-
-    @property
-    def num_users(self) -> int:
-        return len(self.avail_users)
-
-    @property
-    def num_items(self) -> int:
-        return self.db.num_items
-
-    @property
-    def users(self) -> List:
-        """
-        Return all users in the env
-        """
-        return self.db.users[self.db.users.index.isin(self.avail_users)]
-
-    @property
-    def items(self):
-        """
-        Return all items (dataframe) in the env
-        """
-        return self.db.items
-
-    @property
-    def database(self):
-        """
-        Return the underlying database of the environment
-        """
-        return self.db
