@@ -39,7 +39,7 @@ def main(
     # create items dataframe
     items = pd.read_csv(input_folder / "menu_items.csv")
     items = items[["id", "name", "description", "price"]]
-    items = items.rename(columns={"id": "ItemId"})
+    items = items.rename(columns={"id": "ItemID"})
     items.to_csv(output_folder / "foods.csv", index=False)
 
     # create users dataframe
