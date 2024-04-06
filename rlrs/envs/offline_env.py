@@ -1,18 +1,12 @@
-from collections import namedtuple
 from typing import List, Optional
 
 import numpy as np
 
 from rlrs.datasets.movielens import MovieLens
 
-from .base import OfflineEnvBase
+from .base import DEFAULT_DONE_COUNT, OfflineEnvBase, UserStateInfo
 
-DEFAULT_DONE_COUNT = 100
 NEGATIVE_REWARD = -0.5
-
-UserStateInfo = namedtuple(
-    "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"]
-)
 
 
 class MovieLenEnv(OfflineEnvBase):
@@ -26,16 +20,14 @@ class MovieLenEnv(OfflineEnvBase):
         user_id: Optional[int] = None,
         done_count: int = DEFAULT_DONE_COUNT,
     ):
-        self.db = db
-        self.state_size = state_size
-        self.rating_threshold = rating_threshold
-        if user_id is None:
-            self.avail_users = self.db.get_users_by_history(state_size)
-        else:
-            self.avail_users = [user_id]
 
-        self.user = None
-        self.done_count = done_count
+        avail_users = user_id
+        if user_id is not None and not isinstance(user_id, list):
+            avail_users = [user_id]
+
+        super(MovieLenEnv, self).__init__(db, avail_users, state_size, done_count)
+
+        self.rating_threshold = rating_threshold
 
     def reset(self) -> UserStateInfo:
         """
@@ -103,11 +95,10 @@ class MovieLenEnv(OfflineEnvBase):
         )
 
         n_rec_items = len(self.recommended_items)
-        if (
+        self.done = (
             n_rec_items > self.done_count
             or n_rec_items >= self.db.get_user_history_length(self.user)
-        ):
-            self.done = True
+        )
         return UserStateInfo(
             self.user, self.prev_positive_items, self.done, np.mean(rewards)
         )

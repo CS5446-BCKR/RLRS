@@ -1,19 +1,32 @@
 from abc import ABC, abstractmethod
-from typing import List
+from collections import namedtuple
+from typing import List, Optional
 
 from rlrs.datasets.base import Dataset
 
+DEFAULT_DONE_COUNT = 100
+
+UserStateInfo = namedtuple(
+    "UserStateInfo", ["user_id", "prev_pos_items", "done", "reward"]
+)
+
 
 class OfflineEnvBase(ABC):
-    def __init__(self, db: Dataset):
+    def __init__(
+        self, db: Dataset, avail_users: Optional[List], state_size: int, done_count: int
+    ):
         self.db = db
-        self.avail_users = []
+        self.state_size = state_size
+        self.avail_users = avail_users or db.get_users_by_history(state_size)
+        self.done_count = done_count
+        self.state_size = state_size
+        self.user = None
 
     @abstractmethod
-    def reset(self): ...
+    def reset(self) -> UserStateInfo: ...
 
     @abstractmethod
-    def step(self, recommended_items): ...
+    def step(self, recommended_items: List) -> UserStateInfo: ...
 
     @property
     def num_users(self) -> int:
