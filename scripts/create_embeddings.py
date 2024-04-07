@@ -5,7 +5,7 @@ import typer
 from path import Path
 
 from rlrs.datasets.base import Dataset
-from rlrs.datasets.food import Food
+from rlrs.datasets.food import FoodSimple
 from rlrs.datasets.movielens import MovieLens
 from rlrs.embeddings.mf import SVD
 
@@ -16,7 +16,7 @@ def dataset_loader(name: str, dir_path: Path) -> Dataset:
     if name == "movie":
         return MovieLens.from_folder(dir_path)
     elif name == "food":
-        return Food.from_folder(dir_path)
+        return FoodSimple.from_folder(dir_path)
     raise RuntimeError(f"invalid dataset name: {name}")
 
 
