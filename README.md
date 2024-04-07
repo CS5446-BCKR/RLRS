@@ -23,12 +23,10 @@ make test
 make fmt
 ```
 
-## Debugging Training
-```bash
-make test-train
-```
 
 ## Loss Visualization
+
+** To run any training, we need to start `mlflow` first. **
 
 1. Start mlflow server:
 
@@ -37,3 +35,17 @@ mlflow server --host 127.0.0.1 --port 8080
 ```
 
 Open `127.0.0.1:8080` to view MLflow, choose `Experiments`, select the run, click on **Model Metrics** tab to see all losses, metrics.
+
+
+## Debugging Training
+
+### MovieLen training
+```bash
+make test-train
+```
+
+### Ayampp training
+```bash
+make test-ayampp-train
+```
+

@@ -9,5 +9,8 @@ test:
 test-train:
 	pytest tests/test_framework.py -k "test_train_framework" --capture=no --slow
 
+test-ayampp-train:
+	pytest tests/test_framework.py -k "test_ayampp_train_framework" --capture=no --slow
+
 mlflow:
 	mlflow server --host 127.0.0.1 --port 8080

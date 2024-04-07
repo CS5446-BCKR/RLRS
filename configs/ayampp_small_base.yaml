@@ -1,0 +1,44 @@
+input_data: data/test_data/ayampp_lite/
+device: cpu
+
+# Env settings
+state_size: 3
+topk: 3
+# embedding settings
+user_embedding:
+  name: dummy
+  dim: 5
+  file_path: data/test_data/ayampp_lite_embed/embeddings.h5
+  object_name: user
+
+item_embedding:
+  name: dummy
+  dim: 5
+  file_path: data/test_data/ayampp_lite_embed/embeddings.h5
+  object_name: item
+
+actor:
+  hidden_dim : 8
+  lr: 0.0001
+  step_size: 500
+
+# critic config
+critic:
+  embedding_dim: 8
+  hidden_dim: 6
+  step_size: 500
+  lr: 0.0001
+
+# MDP params
+discount_factor: 0.9
+replay_memory_size: 100
+eps_priority: 1e-6
+eps: 1.0
+eps_decay: 0.000001
+std: 1.5
+
+# Training Settings
+tau: 0.001
+batch_size: 8
+M: 20
+workspace: workspace/test_ayampp_lite/
