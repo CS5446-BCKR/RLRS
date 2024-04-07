@@ -1,5 +1,6 @@
+from typing import List, Optional
+
 import numpy as np
-from typin import List, Optional
 
 from rlrs.datasets.food import FoodSimple
 
@@ -25,14 +26,14 @@ class FoodOrderEnv(OfflineEnvBase):
         if user_id is not None and not isinstance(user_id, list):
             avail_users = [user_id]
 
-        super(OfflineEnvBase, self).__init__(db, avail_users, state_size, done_count)
+        super(FoodOrderEnv, self).__init__(db, avail_users, state_size, done_count)
 
     def reset(self) -> UserStateInfo:
         self.user = np.random.choice(self.avail_users)
         self.positive_items = self.db.get_positive_items(self.user)
 
         # historical positive items
-        self.prev_positive_items = self.positive_items[: self.state_size].tolist()
+        self.prev_positive_items = self.positive_items[: self.state_size]
         # assuming all previous items are recommended by the agent
         self.recommended_items = set(self.prev_positive_items)
         self.done = len(self.prev_positive_items) == 0
