@@ -39,7 +39,9 @@ class FoodOrderEnv(OfflineEnvBase):
         self.done = len(self.prev_positive_items) == 0
         return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
 
-    def step(self, recommended_items: List) -> UserStateInfo:
+    def step(
+        self, recommended_items: List, positives: Optional[List] = None
+    ) -> UserStateInfo:
         # Use reward function from Epn 10 in the paper
         # For non-rating positive signal, may need to find
         # alternatives
@@ -53,9 +55,11 @@ class FoodOrderEnv(OfflineEnvBase):
         until the customers get annoyed.
         """
 
+        positives = positives or self.positive_items
+
         for item in recommended_items:
             self.recommended_items.append(item)
-            if item in self.positive_items:
+            if item in positives:
                 true_positives.append(item)
                 rewards.append(POSITIVE_REWARD)
             else:

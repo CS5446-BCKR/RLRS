@@ -55,7 +55,9 @@ class MovieLenEnv(OfflineEnvBase):
         self.done = len(self.prev_positive_items) == 0
         return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
 
-    def step(self, new_rec_items: List) -> UserStateInfo:
+    def step(
+        self, new_rec_items: List, positives: Optional[List] = None
+    ) -> UserStateInfo:
         """
         Given a new recommended item, the env calculate
         the updated reward, depending whether the agent

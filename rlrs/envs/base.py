@@ -29,7 +29,9 @@ class OfflineEnvBase(ABC):
     def reset(self) -> UserStateInfo: ...
 
     @abstractmethod
-    def step(self, recommended_items: List) -> UserStateInfo: ...
+    def step(
+        self, recommended_items: List, positives: Optional[List] = None
+    ) -> UserStateInfo: ...
 
     @property
     def num_users(self) -> int:

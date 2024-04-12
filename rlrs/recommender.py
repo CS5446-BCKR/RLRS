@@ -73,6 +73,12 @@ class Recommender:
         self._init_networks()
         assert all(net for net in [self.drr_ave, self.actor, self.critic])
 
+        # vars for recommending
+        self.user_id = None
+        self.prev_items = None
+        self.done = True
+        self.user_emb = None
+
     def _init_networks(self):
         """
         If there is a checkpoint path, init from checkpoint
@@ -103,7 +109,7 @@ class Recommender:
         if "eval" in self.cfg and self.cfg["eval"]:
             self.load()
 
-    def recommend(self, action):
+    def recommend_from_action(self, action):
         """
         Get *action* from the actor, multiply with the historical positive embeddings.
         Recommended items are those with the highest scores.
@@ -121,11 +127,41 @@ class Recommender:
         self.num_users = self.env.num_users
         self.user_embeddings.fit(self.users)
 
+    def reset(self):
+
+        self.drr_ave.eval()
+        self.critic.eval()
+        self.actor.eval()
+
+        init_state = self.env.reset()
+        self.user_id = init_state.user_id
+        self.done = init_state.done
+        self.prev_items = init_state.prev_pos_items
+        self.user_emb = self.user_embeddings[self.user_id]
+
+    def recommend(self):
+        if self.done:
+            return None
+        items_emb = self.item_embeddings[self.prev_items]
+        state = self.drr_ave((self.user_emb, items_emb))
+        action = self.actor(state).detach()
+        recommended_items = self.recommend_from_action(action)
+        return recommended_items
+
+    def feedback(self, recs, positives):
+        next_state = self.env.step(recs, positives)
+        self.done = next_state.done
+        self.prev_items = next_state.prev_pos_items
+        return next_state.reward
+
     def recommend_items(self):
         """
         Parameters:
             items: a list of historical positive items
         """
+        self.drr_ave.eval()
+        self.critic.eval()
+        self.actor.eval()
         init_state = self.env.reset()
         user_id = init_state.user_id
         prev_items = init_state.prev_pos_items
@@ -139,7 +175,7 @@ class Recommender:
             # Line 8: Find the action based on the current policy
             action = self.actor(state).detach()
             # Line 9: Recommend the new item
-            recommended_items = self.recommend(action)
+            recommended_items = self.recommend_from_action(action)
 
             yield recommended_items
 
@@ -173,7 +209,7 @@ class Recommender:
                 action += torch.normal(torch.zeros_like(action), self.std)
 
             # Line 9: Recommend the new item
-            recommended_items = self.recommend(action)
+            recommended_items = self.recommend_from_action(action)
             logger.debug(f"Recommended items: {recommended_items.values}")
 
             # Line 10: Calculate the reward and the next state

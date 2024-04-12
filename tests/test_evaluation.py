@@ -1,9 +1,10 @@
 import numpy as np
+import torch
 from omegaconf import OmegaConf
 from pytest import fixture
 
 from rlrs.datasets.food import FoodSimple
-from rlrs.envs.food_offline_env import FoodOrderEnv
+from rlrs.envs.food_offline_env import NEGATIVE_REWARD, FoodOrderEnv
 from rlrs.nets.actor import Actor
 from rlrs.nets.critic import Critic
 from rlrs.nets.state_module import DRRAve
@@ -63,3 +64,24 @@ def test_recommend_multiple_uses(rec):
     rec.set_users([AYAMPP_USER_1])
     new_rec_items_user_1 = list(rec.recommend_items())[0]
     assert set(rec_items_user_1) == set(new_rec_items_user_1)
+
+
+def test_recommend_with_feedback(rec):
+    rec.topk = 2
+    # 1. first, reset the env
+    assert rec.user_id is None
+    assert rec.prev_items is None
+    assert rec.done
+    assert rec.user_emb is None
+    rec.reset()
+    assert rec.user_id == AYAMPP_USER_1
+    assert len(rec.prev_items) > 0
+    assert not rec.done
+    assert isinstance(rec.user_emb, torch.Tensor)
+
+    # 2. Step func
+    items = rec.recommend()
+    positives = [items[0]]
+    reward = rec.feedback(items, positives)
+    _ = rec.recommend()
+    assert reward > len(items) * NEGATIVE_REWARD
