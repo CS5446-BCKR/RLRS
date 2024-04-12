@@ -4,7 +4,6 @@ Estimate the Q-value given a state (from env + state network) and an action (fro
 """
 
 import torch
-from loguru import logger
 from omegaconf import DictConfig
 from path import Path
 from torch import nn

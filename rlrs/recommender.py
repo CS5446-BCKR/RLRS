@@ -65,12 +65,20 @@ class Recommender:
 
         # -- Setup components
 
-        self.env = env
+        # DL networks
+        self.drr_ave = None
+        self.actor = None
+        self.critic = None
 
-        self.drr_ave = DRRAve.from_config(cfg["drr"])
+        self._init_networks()
+        assert all(net for net in [self.drr_ave, self.actor, self.critic])
 
+    def _init_networks(self):
+        """
+        If there is a checkpoint path, init from checkpoint
+        """
+        self.drr_ave = DRRAve.from_config(self.cfg["drr"])
         self.drr_output_dim = self.drr_ave.output_dim
-
         # input of actor is the state module output
         # output of it is the embedding dim
         # Fig 3 in the paper
@@ -81,7 +89,6 @@ class Recommender:
                 "tau": self.cfg["tau"],
             }
         )
-        self.actor = Actor.from_config(self.cfg["actor"])
 
         self.cfg["critic"].update(
             {
@@ -91,7 +98,10 @@ class Recommender:
             }
         )
 
+        self.actor = Actor.from_config(self.cfg["actor"])
         self.critic = Critic.from_config(self.cfg["critic"])
+        if "eval" in self.cfg and self.cfg["eval"]:
+            self.load()
 
     def recommend(self, action):
         """
@@ -229,14 +239,22 @@ class Recommender:
         critic_path = self._get_checkpoint_sub(subdir) / "critic.pth"
         return critic_path
 
+    def get_drr_checkpoint(self, subdir: Optional[Path] = None):
+        drr_path = self._get_checkpoint_sub(subdir) / "drr.pth"
+        return drr_path
+
     def save(self, subdir: Optional[Path] = None):
         actor_checkpoint = self.get_actor_checkpoint(subdir)
         self.actor.save(actor_checkpoint)
         critic_checkpoint = self.get_critic_checkpoint(subdir)
         self.critic.save(critic_checkpoint)
+        drr_checkpoint = self.get_drr_checkpoint(subdir)
+        self.drr_ave.save(drr_checkpoint)
 
     def load(self, subdir: Optional[Path] = None):
         actor_checkpoint = self.get_actor_checkpoint(subdir)
         self.actor.load(actor_checkpoint)
         critic_checkpoint = self.get_critic_checkpoint(subdir)
         self.critic.load(critic_checkpoint)
+        drr_checkpoint = self.get_drr_checkpoint(subdir)
+        self.drr_ave.load(drr_checkpoint)

@@ -1,4 +1,7 @@
-eval: False
+# Config for inference/evaluation
+#
+
+eval: True
 input_data: data/test_data/ayampp_lite/
 device: cpu
 
@@ -45,4 +48,4 @@ std: 1.5
 tau: 0.001
 batch_size: 8
 M: 20
-workspace: workspace/test_ayampp_lite/
+workspace: data/test_data/ayampp_checkpoint/
