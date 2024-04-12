@@ -84,4 +84,4 @@ def test_recommend_with_feedback(rec):
     positives = [items[0]]
     reward = rec.feedback(items, positives)
     _ = rec.recommend()
-    assert reward > len(items) * NEGATIVE_REWARD
+    assert reward > NEGATIVE_REWARD

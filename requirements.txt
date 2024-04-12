@@ -13,3 +13,5 @@ loguru
 mlflow
 pytest-skip-slow
 h5py
+fastapi
+uvicorn[standard]

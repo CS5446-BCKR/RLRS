@@ -4,7 +4,7 @@ fmt:
 	black .
 
 test:
-	pytest . -v
+	pytest . -v --disable-warnings
 
 mock-train-movie:
 	pytest tests/test_framework.py -k "test_train_framework" --capture=no --slow
@@ -14,3 +14,6 @@ mock-train-food:
 
 mlflow:
 	mlflow server --host 127.0.0.1 --port 8080
+
+server:
+	uvicorn app:app --reload

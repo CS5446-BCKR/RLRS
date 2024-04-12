@@ -49,3 +49,12 @@ make mock-train-movie
 make mock-train-food
 ```
 
+# Model Inference
+
+## Start the server
+```bash
+make server
+```
+
+Go to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to check how to call API(s).
+
