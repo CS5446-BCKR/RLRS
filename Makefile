@@ -6,10 +6,10 @@ fmt:
 test:
 	pytest .
 
-test-train:
+mock-train-movie:
 	pytest tests/test_framework.py -k "test_train_framework" --capture=no --slow
 
-test-ayampp-train:
+mock-train-food:
 	pytest tests/test_framework.py -k "test_ayampp_train_framework" --capture=no --slow
 
 mlflow:

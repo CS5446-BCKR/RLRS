@@ -10,7 +10,7 @@ from rlrs.datasets.food import FoodSimple
 from rlrs.datasets.movielens import MovieLens
 from rlrs.envs.food_offline_env import FoodOrderEnv
 from rlrs.envs.offline_env import MovieLenEnv
-from rlrs.movie_recommender import MovieRecommender
+from rlrs.recommender import Recommender
 
 CFG = "configs/movielen_small_base.yaml"
 AYAMPP_LITE_CFG = "configs/ayampp_small_base.yaml"
@@ -33,7 +33,7 @@ def recommender():
         user_id=2,
         done_count=40,
     )
-    return MovieRecommender(env, cfg)
+    return Recommender(env, cfg)
 
 
 @fixture
@@ -46,7 +46,7 @@ def ayampp_lite_recommender():
         user_id=AYAMPP_USER,
         done_count=6,
     )
-    return MovieRecommender(env, cfg)
+    return Recommender(env, cfg)
 
 
 def test_init_framework(recommender):

@@ -23,7 +23,7 @@ from rlrs.nets.state_module import DRRAve
 from rlrs.replay.replay_buffer import PriorityExperienceReplay
 
 
-class MovieRecommender:
+class Recommender:
     def __init__(self, env: MovieLenEnv, cfg: DictConfig):
         self.env = env
         self.cfg = cfg
