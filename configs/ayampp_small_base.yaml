@@ -17,6 +17,9 @@ item_embedding:
   file_path: data/test_data/ayampp_lite_embed/embeddings.h5
   object_name: item
 
+drr:
+  dim: 5
+
 actor:
   hidden_dim : 8
   lr: 0.0001

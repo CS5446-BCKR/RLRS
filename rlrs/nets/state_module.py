@@ -1,4 +1,5 @@
 import torch
+from omegaconf import DictConfig
 from path import Path
 from torch import nn
 
@@ -41,4 +42,9 @@ class DRRAve(nn.Module):
 
         model = cls(checkpoint["input_dim"])
         model.load_state_dict(checkpoint["state_dict"])
+        return model
+
+    @classmethod
+    def from_config(cls, cfg: DictConfig):
+        model = cls(cfg["dim"])
         return model

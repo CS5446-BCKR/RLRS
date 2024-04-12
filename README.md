@@ -41,11 +41,11 @@ Open `127.0.0.1:8080` to view MLflow, choose `Experiments`, select the run, clic
 
 ### MovieLen training
 ```bash
-make test-train
+make mock-train-movie
 ```
 
 ### Ayampp training
 ```bash
-make test-ayampp-train
+make mock-train-food
 ```
 

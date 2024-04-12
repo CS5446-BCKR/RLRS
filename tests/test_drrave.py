@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from omegaconf import OmegaConf
 from pytest import fixture
 
 from rlrs.nets.state_module import DRRAve
@@ -7,6 +8,12 @@ from rlrs.nets.state_module import DRRAve
 INPUT_DIM = 5
 OUTPUT_DIM = 3 * INPUT_DIM
 CHECKPOINT = "data/test_data/checkpoints/drrave.pth"
+
+DICT_CONFIG = OmegaConf.create(
+    {
+        "dim": INPUT_DIM,
+    }
+)
 
 
 @fixture
@@ -37,3 +44,9 @@ def test_persistent_drr_ave(net):
     new_weight = new.conv.weight.detach().numpy()
     assert np.allclose(old_weight, new_weight)
     assert new.input_dim == net.input_dim
+
+
+def test_init_drr_from_config():
+    net = DRRAve.from_config(DICT_CONFIG)
+    assert net.input_dim == INPUT_DIM
+    assert net.output_dim == OUTPUT_DIM

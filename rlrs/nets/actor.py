@@ -3,7 +3,6 @@ TODO (02/03/24): save and load networks
 """
 
 import torch
-from loguru import logger
 from omegaconf import DictConfig
 from path import Path
 from torch import nn

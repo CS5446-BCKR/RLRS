@@ -67,7 +67,7 @@ class Recommender:
 
         self.env = env
 
-        self.drr_ave = DRRAve(self.dim)
+        self.drr_ave = DRRAve.from_config(cfg["drr"])
 
         self.drr_output_dim = self.drr_ave.output_dim
 
