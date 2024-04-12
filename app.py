@@ -17,6 +17,10 @@ class Feedback(BaseModel):
     positives: List[str]
 
 
+class Status(BaseModel):
+    status: str
+
+
 app = FastAPI()
 cfg = OmegaConf.load(AYAMPP_LITE_CFG)
 dataset = FoodSimple.from_folder(cfg["input_data"])
@@ -27,20 +31,23 @@ recommender = Recommender(env, cfg)
 
 
 @app.get("/reset/{user_id}")
-def reset_env(user_id: str):
+def reset_env(user_id: str) -> Status:
+    """
+    Reset the environment to the new user_id
+    """
     recommender.set_users([user_id])
     recommender.reset()
-    return {"status": "done"}
+    return Status(status="done")
 
 
 @app.get("/recommend")
-def recommend():
+def recommend() -> List[str]:
     items = recommender.recommend()
-    items = list(items)
-    return {"items": items}
+    items = list(map(str, items))
+    return items
 
 
 @app.put("/feedback")
-def feedback(item_feedbacks: Feedback):
+def feedback(item_feedbacks: Feedback) -> float:
     reward = recommender.feedback(item_feedbacks.items, item_feedbacks.positives)
-    return {"reward": reward}
+    return reward
