@@ -8,18 +8,18 @@ topk: 3
 # embedding settings
 user_embedding:
   name: dummy
-  dim: 5
+  dim: 3
   file_path: data/test_data/ayampp_lite_embed/embeddings.h5
   object_name: user
 
 item_embedding:
   name: dummy
-  dim: 5
+  dim: 3
   file_path: data/test_data/ayampp_lite_embed/embeddings.h5
   object_name: item
 
 drr:
-  dim: 5
+  dim: 3
 
 actor:
   hidden_dim : 8

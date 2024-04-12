@@ -41,5 +41,5 @@ std: 1.5
 # Training Settings
 tau: 0.001
 batch_size: 8
-M: 20
+M: 5
 workspace: workspace/test_0

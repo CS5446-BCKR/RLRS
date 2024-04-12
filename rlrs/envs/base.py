@@ -22,6 +22,9 @@ class OfflineEnvBase(ABC):
         self.state_size = state_size
         self.user = None
 
+    def set_users(self, new_users):
+        self.avail_users = new_users
+
     @abstractmethod
     def reset(self) -> UserStateInfo: ...
 

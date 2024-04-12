@@ -115,6 +115,39 @@ class Recommender:
         indices = indices[: self.topk]
         return self.items.iloc[indices.numpy()].index
 
+    def set_users(self, users_):
+        self.env.set_users(users_)
+        self.users = self.env.users
+        self.num_users = self.env.num_users
+        self.user_embeddings.fit(self.users)
+
+    def recommend_items(self):
+        """
+        Parameters:
+            items: a list of historical positive items
+        """
+        init_state = self.env.reset()
+        user_id = init_state.user_id
+        prev_items = init_state.prev_pos_items
+        done = init_state.done
+        user_emb = self.user_embeddings[user_id]
+        while not done:
+            items_emb = self.item_embeddings[prev_items]
+            # Line 7: Find the state via DRR
+            state = self.drr_ave((user_emb, items_emb))
+
+            # Line 8: Find the action based on the current policy
+            action = self.actor(state).detach()
+            # Line 9: Recommend the new item
+            recommended_items = self.recommend(action)
+
+            yield recommended_items
+
+            # Line 10: Calculate the reward and the next state
+            next_user_state = self.env.step(recommended_items)
+            prev_items = next_user_state.prev_pos_items
+            done = next_user_state.done
+
     def train_on_episode(self, iter_count):
         episode_reward = 0
         # 3. (Line 5) observe the initial state

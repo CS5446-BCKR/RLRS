@@ -35,7 +35,7 @@ class FoodOrderEnv(OfflineEnvBase):
         # historical positive items
         self.prev_positive_items = self.positive_items[: self.state_size]
         # assuming all previous items are recommended by the agent
-        self.recommended_items = set(self.prev_positive_items)
+        self.recommended_items = list(set(self.prev_positive_items))
         self.done = len(self.prev_positive_items) == 0
         return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
 
@@ -54,7 +54,7 @@ class FoodOrderEnv(OfflineEnvBase):
         """
 
         for item in recommended_items:
-            self.recommended_items.add(item)
+            self.recommended_items.append(item)
             if item in self.positive_items:
                 true_positives.append(item)
                 rewards.append(POSITIVE_REWARD)

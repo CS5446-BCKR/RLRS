@@ -6,23 +6,23 @@ input_data: data/test_data/ayampp_lite/
 device: cpu
 
 # Env settings
-state_size: 3
-topk: 3
+state_size: 2
+topk: 10
 # embedding settings
 user_embedding:
-  name: dummy
-  dim: 5
+  name: pretrained
+  dim: 3
   file_path: data/test_data/ayampp_lite_embed/embeddings.h5
   object_name: user
 
 item_embedding:
-  name: dummy
-  dim: 5
+  name: pretrained
+  dim: 3
   file_path: data/test_data/ayampp_lite_embed/embeddings.h5
   object_name: item
 
 drr:
-  dim: 5
+  dim: 3
 
 actor:
   hidden_dim : 8

@@ -4,7 +4,7 @@ fmt:
 	black .
 
 test:
-	pytest .
+	pytest . -v
 
 mock-train-movie:
 	pytest tests/test_framework.py -k "test_train_framework" --capture=no --slow

@@ -59,6 +59,11 @@ def neg_env():
     return env
 
 
+def test_change_user(env):
+    env.set_users([12])
+    assert env.avail_users == [12]
+
+
 def test_env_reset(env):
     state = env.reset()
 

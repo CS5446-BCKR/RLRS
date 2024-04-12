@@ -33,6 +33,13 @@ class AccessWithIndexMixin:
             return None
         return torch.stack(embs)
 
+    @cached_property
+    def all(self):
+        """
+        Not efficient here
+        """
+        return torch.stack(self.embs["emb"].values.tolist())
+
 
 class PretrainedEmbedding(AccessWithIndexMixin, EmbeddingBase):
     def __init__(self, data: torch.Tensor, index):
@@ -49,8 +56,12 @@ class PretrainedEmbedding(AccessWithIndexMixin, EmbeddingBase):
 
         with h5py.File(file_path, "r") as f:
             data = np.asarray(f[f"{object_name}_embedding"])
-            index = list(f[f"{object_name}_index"])
-            data = torch.from_numpy(data)
+            index = []
+            for idx in f[f"{object_name}_index"]:
+                if isinstance(idx, bytes):
+                    idx = idx.decode("utf-8")
+                index.append(idx)
+            data = torch.from_numpy(data.astype(np.float32))
             return clz(data, index)
 
 
@@ -71,10 +82,3 @@ class DummyEmbedding(AccessWithIndexMixin, EmbeddingBase):
         """
         self.embs = pd.DataFrame(index=data.index)
         self.embs["emb"] = self.embs.index.map(lambda i: torch.randn(self.dim))
-
-    @cached_property
-    def all(self):
-        """
-        Not efficient here
-        """
-        return torch.stack(self.embs["emb"].values.tolist())

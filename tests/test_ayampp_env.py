@@ -87,7 +87,8 @@ def test_env_reset(env):
         "URP9e2B1WdCZkhX5Rl9j",
         "Bab6SE4e8yfncTSfJcbN",
     ]
-    assert env.recommended_items == set(
+
+    assert set(env.recommended_items) == set(
         ["Rp4T9cGa5SptaNJv2nuk", "URP9e2B1WdCZkhX5Rl9j", "Bab6SE4e8yfncTSfJcbN"]
     )
     assert not state.done
@@ -98,7 +99,7 @@ def test_empty_historical_positive(neg_env):
     state = neg_env.reset()
     assert state.user_id == EMPTY_HIS_USER_ID
     assert state.prev_pos_items == []
-    assert neg_env.recommended_items == set([])
+    assert set(neg_env.recommended_items) == set([])
     assert state.done
     assert state.reward == 0
 
