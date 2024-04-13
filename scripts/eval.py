@@ -1,6 +1,7 @@
-import typer
 import numpy as np
+import typer
 from omegaconf import OmegaConf
+from path import Path
 
 from rlrs.datasets.food import FoodSimple
 from rlrs.envs.food_offline_env import FoodOrderEnv
@@ -9,87 +10,77 @@ from rlrs.recommender import Recommender
 AYAMPP_LITE_CFG = "configs/ayampp_small_base_infer.yaml"
 
 
-def train_test_split(dataset,cfg): 
-    user_num = dataset.num_users()
-    test_ratio = cfg["test_ratio"]
-    eval_user_num = int(user_num * test_ratio)
-    eval_user_list = dataset.users_[eval_user_num:]
-    return eval_user_list
+app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
-def evaluate(recommender, env ,top_k, verbal = False): 
-    steps = 0
-    mean_precision = 0
-    user_id, items_ids, done, episode_reward = env.reset()
+def prepare_groundtruths(dataset: FoodSimple, state_size: int):
+    """
+    Find all users with histories > state_size
+    All items whose indexes > state_size are considered
+    as groundtruths for evaluation
+    """
+    users_with_history = dataset.get_users_by_history(state_size + 1)
+    groundtruths = {}
+    for user in users_with_history:
+        groundtruths[user] = dataset.get_positive_items(user)[state_size:]
+    return groundtruths
+
+
+def evaluate(recommender: Recommender, user, gts, top_k, verbal=False):
+    """
+    1-step evaluation
+    """
+    recommender.set_users([user])
+    recommender.reset()
 
     if verbal:
-        print(f'user_id : {user_id}, user_history_length:{len(env.db.get_user_history_length(user_id))}')
-        '''TODO: missing get_items_names equivalent'''
-        print('history items : \n', np.array(env.get_items_names(items_ids)))
-    
-    if not done:
-        recommended_item = recommender.recommend()
-        if verbal:
-            print(f'recommended items ids : {recommended_item}')
-            '''TODO: missing get_items_names equivalent'''
-            print(f'recommened items : \n {np.array(env.get_items_names(recommended_item), dtype=object)}')
-        # Calculate reward & observe new state (in env)
-        '''our current step has no concept of TOPK'''
-        _, next_items_ids, done , reward = env.step(recommended_item, top_k=top_k)
-        '''TODO: need the list of rewards in different items recommended for eval'''
-        correct_list = [1 if r > 0 else 0 for r in reward]
-        
-        #precision
-        correct_num = top_k - correct_list.count(0)
-        mean_precision += correct_num/top_k
-            
-        reward = np.sum(reward)
-        items_ids = next_items_ids
-        episode_reward += reward
-        steps += 1
-        
-        if verbal:
-            print(f'precision : {correct_num/top_k}, reward : {reward}')
-            print()
-    
+        user_hist_len = recommender.env.db.get_user_history_length(user)
+        history_items = recommender.env.db.get_positive_items(user)
+        print(f"user_id : {user}, user_history_length:{user_hist_len}")
+        """TODO: missing get_items_names equivalent"""
+        print(f"history items : \n {history_items}")
+        print(f"Groundtruths: \n {gts}")
+
+    recommended_items = recommender.recommend()
+
+    true_pos = set(recommended_items) & set(gts)
+    precision = len(true_pos) / top_k
     if verbal:
-        print(f'precision : {mean_precision/steps}, episode_reward : {episode_reward}')
-        print()
-    
-    return mean_precision/steps
+        print(f"recommended items ids : {recommended_items}")
+        print(f"true positives: {true_pos}")
+        print(f"Prec@{top_k} {user}: {precision}")
+        print("=======")
+    return precision
 
 
-def main(): 
-    cfg = OmegaConf.load(AYAMPP_LITE_CFG)
+@app.command()
+def main(
+    config_path: Path = typer.Argument(
+        ..., file_okay=True, exists=True, help="Path to the config file", path_type=Path
+    ),
+    verbose: bool = typer.Option(False, help="verbose mode"),
+):
+    cfg = OmegaConf.load(config_path)
+    state_size = cfg["state_size"]
     dataset = FoodSimple.from_folder(cfg["input_data"])
+    env = FoodOrderEnv(
+        dataset,
+        state_size=state_size,
+        user_id=None,
+        done_count=cfg["done_count"],
+    )
     recommender = Recommender(env, cfg)
-    TOP_K = cfg["topk"]
-    SHOW_EVAL = cfg["show_evaluation"]
-    sum_precision = 0
+    topk = cfg["topk"]
+    precs = []
 
-    eval_user_list = train_test_split(dataset,cfg)
+    groundtruths = prepare_groundtruths(dataset, state_size)
 
+    for user, gts in groundtruths.items():
+        precision = evaluate(recommender, user, gts, top_k=topk, verbal=verbose)
+        precs.append(precision)
 
-    for i, user_id in enumerate(eval_user_list):
-        '''TODO: update env for real'''
-        env = FoodOrderEnv(
-            dataset, state_size=cfg["state_size"], 
-            user_id=user_id, done_count = 6
-            )
-        '''TODO: check if the below is needed for our recommender'''
-        '''BELOW is to init the recommender to generate eval'''
-        recommender = DRRAgent(env, users_num, items_num, STATE_SIZE)
-        recommender.actor.build_networks()
-        recommender.critic.build_networks()
-        recommender.load_model(saved_actor, saved_critic)
+    print(f"Avg Precision@{topk}: {np.mean(precs)}")
 
-        '''verbal information for show and tell (presentation) & need to dump somewhere'''
-        precision = evaluate(recommender, env, verbal=True, top_k=TOP_K) 
-        sum_precision += precision
-        
-        if SHOW_EVAL > 0:
-            if i > SHOW_EVAL:
-                break
 
 if __name__ == "__main__":
     typer.run(main)

@@ -5,6 +5,7 @@ device: cpu
 # Env settings
 state_size: 3
 topk: 3
+done_count: 6
 # embedding settings
 user_embedding:
   name: dummy
