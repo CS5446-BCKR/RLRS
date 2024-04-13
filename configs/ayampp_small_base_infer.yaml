@@ -8,6 +8,7 @@ device: cpu
 # Env settings
 state_size: 2
 topk: 10
+done_count: 6
 # embedding settings
 user_embedding:
   name: pretrained
@@ -49,3 +50,9 @@ tau: 0.001
 batch_size: 8
 M: 20
 workspace: data/test_data/ayampp_checkpoint/
+
+
+# Evaluation settings
+test_ratio: 0.2
+show_evaluation: 10
+

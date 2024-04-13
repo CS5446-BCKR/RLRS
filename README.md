@@ -13,7 +13,7 @@ Finally, install the package: `pip install -e .`
 
 # Development
 
-## Test
+## Unit Test
 ```bash
 make test
 ```
@@ -58,3 +58,8 @@ make server
 
 Go to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) to check how to call API(s).
 
+# Evaluation
+
+```bash
+python scripts/eval.py <config-file> [--verbose]
+```
