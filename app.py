@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from omegaconf import OmegaConf
 from pydantic import BaseModel
 
@@ -20,8 +21,21 @@ class Feedback(BaseModel):
 class Status(BaseModel):
     status: str
 
+origins = [
+    "*",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8080",
+]
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 cfg = OmegaConf.load(AYAMPP_LITE_CFG)
 dataset = FoodSimple.from_folder(cfg["input_data"])
 env = FoodOrderEnv(
