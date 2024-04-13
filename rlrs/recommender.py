@@ -28,6 +28,7 @@ class Recommender:
         self.env = env
         self.cfg = cfg
         self.topk = cfg["topk"]
+        self.mlflow_port = cfg.get("mlflow_port", 8080)
         user_emb_cfg = cfg["user_embedding"]
         item_emb_cfg = cfg["item_embedding"]
         assert user_emb_cfg["dim"] == item_emb_cfg["dim"]
@@ -282,9 +283,9 @@ class Recommender:
             state_dim=self.drr_output_dim,
             action_dim=self.dim,
         )
-        mlflow.set_tracking_uri(uri="http://127.0.0.1:8080")
+        mlflow.set_tracking_uri(uri=f"http://127.0.0.1:{self.mlflow_port}")
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        mlflow.set_experiment(f"Movie Recommender: {now}")
+        mlflow.set_experiment(f"Recommender: {now}")
         iter_count = 0
         with mlflow.start_run():
             mlflow.log_params(self.cfg)

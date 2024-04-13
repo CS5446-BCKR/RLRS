@@ -9,7 +9,7 @@ from rlrs.datasets.food import FoodSimple
 from rlrs.envs.food_offline_env import FoodOrderEnv
 from rlrs.recommender import Recommender
 
-AYAMPP_LITE_CFG = "configs/ayampp_small_base_infer.yaml"
+AYAMPP_LITE_CFG = "configs/ayampp_full_infer.yaml"
 AYAMPP_USER_1 = "zs5V5O4zMPYiKxzO0e2EBy4uq403"
 
 

@@ -1,0 +1,52 @@
+eval: True
+input_data: data/ayampp_cleaned/
+device: cpu
+mlflow_port: 8088
+
+# Env settings
+state_size: 5
+topk: 10
+
+# recommend 5 times
+done_count: 50
+# embedding settings
+user_embedding:
+  name: pretrained
+  dim: 32
+  file_path: data/ayampp_cleaned_embs/embeddings.h5
+  object_name: user
+
+item_embedding:
+  name: pretrained
+  dim: 32
+  file_path: data/ayampp_cleaned_embs/embeddings.h5
+  object_name: item
+
+drr:
+  dim: 32
+
+actor:
+  hidden_dim : 64
+  lr: 0.0001
+  step_size: 500
+
+# critic config
+critic:
+  embedding_dim: 64
+  hidden_dim: 32
+  step_size: 500
+  lr: 0.0001
+
+# MDP params
+discount_factor: 0.9
+replay_memory_size: 100
+eps_priority: 1e-6
+eps: 1.0
+eps_decay: 0.000001
+std: 1.5
+
+# Training Settings
+tau: 0.001
+batch_size: 8
+M: 100
+workspace: checkpoints/ayampp_full_1
