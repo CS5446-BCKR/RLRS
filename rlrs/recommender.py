@@ -28,6 +28,7 @@ class Recommender:
         self.env = env
         self.cfg = cfg
         self.topk = cfg["topk"]
+        self.save_interval = cfg.get("save_interval", 1)
         self.mlflow_port = cfg.get("mlflow_port", 8080)
         user_emb_cfg = cfg["user_embedding"]
         item_emb_cfg = cfg["item_embedding"]
@@ -268,7 +269,7 @@ class Recommender:
             # move to the next state
             prev_items = next_user_state.prev_pos_items
             episode_reward += next_user_state.reward
-        logger.debug(f"Episode Reward: {episode_reward}")
+        logger.info(f"Episode Reward: {episode_reward}")
         mlflow.log_metric("episode_reward", episode_reward, step=iter_count)
         return iter_count
 
@@ -290,9 +291,10 @@ class Recommender:
         with mlflow.start_run():
             mlflow.log_params(self.cfg)
             for episode in range(self.M):
-                logger.debug(f"Start episode #{episode}")
+                logger.info(f"Start episode #{episode}")
                 iter_count = self.train_on_episode(iter_count)
-                self.save(f"ep_{episode}")
+                if (episode + 1) % self.save_interval == 0:
+                    self.save(f"ep_{episode+1}")
 
     def _get_checkpoint_sub(self, subdir: Optional[Path] = None):
         path = self.workspace
