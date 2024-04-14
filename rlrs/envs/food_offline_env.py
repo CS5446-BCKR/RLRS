@@ -37,7 +37,7 @@ class FoodOrderEnv(OfflineEnvBase):
         self.positive_items = self.all_positive_items[self.state_size:]
         # assuming all previous items are recommended by the agent
         self.recommended_items = list(set(self.prev_positive_items))
-        self.done = len(self.prev_positive_items) == 0
+        self.done = len(self.positive_items) == 0
         return UserStateInfo(self.user, self.prev_positive_items, self.done, 0)
 
     def step(

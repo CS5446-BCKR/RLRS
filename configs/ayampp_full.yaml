@@ -1,14 +1,14 @@
 eval: False
 input_data: data/ayampp_cleaned/
 device: cpu
-mlflow_port: 8088
+mlflow_port: 8080
 
 # Env settings
 state_size: 5
 topk: 10
 
 # recommend 5 times
-done_count: 50
+done_count: 100
 # embedding settings
 user_embedding:
   name: pretrained
@@ -49,4 +49,4 @@ std: 1.5
 tau: 0.001
 batch_size: 8
 M: 100
-workspace: checkpoints/ayampp_full_1
+workspace: workspace/ayampp_full_1
