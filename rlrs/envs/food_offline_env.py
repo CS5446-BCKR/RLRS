@@ -30,10 +30,11 @@ class FoodOrderEnv(OfflineEnvBase):
 
     def reset(self) -> UserStateInfo:
         self.user = np.random.choice(self.avail_users)
-        self.positive_items = self.db.get_positive_items(self.user)
+        self.all_positive_items = self.db.get_positive_items(self.user)
 
         # historical positive items
-        self.prev_positive_items = self.positive_items[: self.state_size]
+        self.prev_positive_items = self.all_positive_items[: self.state_size]
+        self.positive_items = self.all_positive_items[self.state_size:]
         # assuming all previous items are recommended by the agent
         self.recommended_items = list(set(self.prev_positive_items))
         self.done = len(self.prev_positive_items) == 0
