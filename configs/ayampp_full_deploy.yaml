@@ -4,7 +4,7 @@ device: cpu
 mlflow_port: 8088
 
 # Env settings
-state_size: 5
+state_size: 10
 topk: 10
 
 # recommend 5 times

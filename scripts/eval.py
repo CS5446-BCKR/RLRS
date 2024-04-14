@@ -23,6 +23,7 @@ def prepare_groundtruths(dataset: FoodSimple, state_size: int):
     groundtruths = {}
     for user in users_with_history:
         groundtruths[user] = dataset.get_positive_items(user)[state_size:]
+        assert len(groundtruths[user]) > 0
     return groundtruths
 
 
@@ -45,12 +46,14 @@ def evaluate(recommender: Recommender, user, gts, top_k, verbal=False):
 
     true_pos = set(recommended_items) & set(gts)
     precision = len(true_pos) / top_k
+    r1 = int(len(true_pos) > 0)
     if verbal:
         print(f"recommended items ids : {recommended_items}")
         print(f"true positives: {true_pos}")
         print(f"Prec@{top_k} {user}: {precision}")
+        print(f"Recall-1@{top_k} {user}: {r1}")
         print("=======")
-    return precision
+    return precision, r1
 
 
 @app.command()
@@ -72,14 +75,17 @@ def main(
     recommender = Recommender(env, cfg)
     topk = cfg["topk"]
     precs = []
+    r1_at_k = []
 
     groundtruths = prepare_groundtruths(dataset, state_size)
 
     for user, gts in groundtruths.items():
-        precision = evaluate(recommender, user, gts, top_k=topk, verbal=verbose)
+        precision, r1 = evaluate(recommender, user, gts, top_k=topk, verbal=verbose)
         precs.append(precision)
+        r1_at_k.append(r1)
 
     print(f"Avg Precision@{topk}: {np.mean(precs)}")
+    print(f"Avg Recall-1@{topk}: {np.mean(r1_at_k)}")
 
 
 if __name__ == "__main__":
