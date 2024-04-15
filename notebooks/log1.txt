@@ -1,0 +1,28 @@
+user_id : bvkoXpIE2SMiRm6CmOUFJyWZoP62, user_history_length:3
+history items : 
+ ['uaaCfJnKgLDbpp5BKjJs', 'sIYfTIFkqU3XYxoRy8G1', 'H1jWneJIwy0vU2nTrSMJ']
+Groundtruths: 
+ ['H1jWneJIwy0vU2nTrSMJ']
+recommended items ids : Index(['Bab6SE4e8yfncTSfJcbN', 'uyLAIkFrugXDFupn5cH6', 'URP9e2B1WdCZkhX5Rl9j',
+       'uaaCfJnKgLDbpp5BKjJs', 'H1jWneJIwy0vU2nTrSMJ', 'sIYfTIFkqU3XYxoRy8G1',
+       '0Xd60T9Jc4hxDjD85u5w', 'Rp4T9cGa5SptaNJv2nuk'],
+      dtype='object', name='ItemID')
+true positives: {'H1jWneJIwy0vU2nTrSMJ'}
+Prec@10 bvkoXpIE2SMiRm6CmOUFJyWZoP62: 0.1
+Recall-1@10 bvkoXpIE2SMiRm6CmOUFJyWZoP62: 1
+=======
+user_id : zs5V5O4zMPYiKxzO0e2EBy4uq403, user_history_length:14
+history items : 
+ ['Rp4T9cGa5SptaNJv2nuk', 'URP9e2B1WdCZkhX5Rl9j', 'Bab6SE4e8yfncTSfJcbN', 'uaaCfJnKgLDbpp5BKjJs', 'uyLAIkFrugXDFupn5cH6', 'URP9e2B1WdCZkhX5Rl9j', 'URP9e2B1WdCZkhX5Rl9j', 'uaaCfJnKgLDbpp5BKjJs', 'uaaCfJnKgLDbpp5BKjJs', 'URP9e2B1WdCZkhX5Rl9j', 'uyLAIkFrugXDFupn5cH6', 'uaaCfJnKgLDbpp5BKjJs', 'URP9e2B1WdCZkhX5Rl9j', 'uaaCfJnKgLDbpp5BKjJs']
+Groundtruths: 
+ ['Bab6SE4e8yfncTSfJcbN', 'uaaCfJnKgLDbpp5BKjJs', 'uyLAIkFrugXDFupn5cH6', 'URP9e2B1WdCZkhX5Rl9j', 'URP9e2B1WdCZkhX5Rl9j', 'uaaCfJnKgLDbpp5BKjJs', 'uaaCfJnKgLDbpp5BKjJs', 'URP9e2B1WdCZkhX5Rl9j', 'uyLAIkFrugXDFupn5cH6', 'uaaCfJnKgLDbpp5BKjJs', 'URP9e2B1WdCZkhX5Rl9j', 'uaaCfJnKgLDbpp5BKjJs']
+recommended items ids : Index(['Bab6SE4e8yfncTSfJcbN', 'sIYfTIFkqU3XYxoRy8G1', 'H1jWneJIwy0vU2nTrSMJ',
+       'URP9e2B1WdCZkhX5Rl9j', 'uaaCfJnKgLDbpp5BKjJs', 'uyLAIkFrugXDFupn5cH6',
+       '0Xd60T9Jc4hxDjD85u5w', 'Rp4T9cGa5SptaNJv2nuk'],
+      dtype='object', name='ItemID')
+true positives: {'uyLAIkFrugXDFupn5cH6', 'Bab6SE4e8yfncTSfJcbN', 'uaaCfJnKgLDbpp5BKjJs', 'URP9e2B1WdCZkhX5Rl9j'}
+Prec@10 zs5V5O4zMPYiKxzO0e2EBy4uq403: 0.4
+Recall-1@10 zs5V5O4zMPYiKxzO0e2EBy4uq403: 1
+=======
+Avg Precision@10: 0.25
+Avg Recall-1@10: 1.0
