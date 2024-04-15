@@ -7,39 +7,39 @@ mlflow_port: 8088
 state_size: 10
 topk: 10
 
-# recommend 5 times
-done_count: 50
+# recommend 20 times
+done_count: 200
 # embedding settings
 user_embedding:
   name: pretrained
-  dim: 32
-  file_path: data/ayampp_cleaned_embs/embeddings.h5
+  dim: 4
+  file_path: data/ayampp_cleaned_embs_4/embeddings.h5
   object_name: user
 
 item_embedding:
   name: pretrained
-  dim: 32
-  file_path: data/ayampp_cleaned_embs/embeddings.h5
+  dim: 4
+  file_path: data/ayampp_cleaned_embs_4/embeddings.h5
   object_name: item
 
 drr:
-  dim: 32
+  dim: 4
 
 actor:
-  hidden_dim : 64
-  lr: 0.0001
-  step_size: 500
+  hidden_dim : 128
+  lr: 0.001
+  step_size: 20000
 
 # critic config
 critic:
   embedding_dim: 64
   hidden_dim: 32
-  step_size: 500
-  lr: 0.0001
+  step_size: 2000
+  lr: 0.001
 
 # MDP params
 discount_factor: 0.9
-replay_memory_size: 100
+replay_memory_size: 10000
 eps_priority: 1e-6
 eps: 1.0
 eps_decay: 0.000001
@@ -48,5 +48,6 @@ std: 1.5
 # Training Settings
 tau: 0.001
 batch_size: 8
-M: 100
-workspace: checkpoints/ayampp_full_1
+M: 5000
+workspace: checkpoints/ayampp_full_1/
+save_interval: 1000
