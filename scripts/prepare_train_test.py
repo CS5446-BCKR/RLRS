@@ -1,5 +1,5 @@
-import typer
 import pandas as pd
+import typer
 from path import Path
 from sklearn.model_selection import train_test_split
 

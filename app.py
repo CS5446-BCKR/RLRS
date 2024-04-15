@@ -21,6 +21,7 @@ class Feedback(BaseModel):
 class Status(BaseModel):
     status: str
 
+
 origins = [
     "*",
     "http://127.0.0.1",
