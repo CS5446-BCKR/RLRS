@@ -85,6 +85,10 @@ class Recommender:
         """
         If there is a checkpoint path, init from checkpoint
         """
+        if "eval" in self.cfg and self.cfg["eval"]:
+            self.load()
+            self.drr_output_dim = self.drr_ave.output_dim
+            return
         self.drr_ave = DRRAve.from_config(self.cfg["drr"])
         self.drr_output_dim = self.drr_ave.output_dim
         # input of actor is the state module output
@@ -108,8 +112,6 @@ class Recommender:
 
         self.actor = Actor.from_config(self.cfg["actor"])
         self.critic = Critic.from_config(self.cfg["critic"])
-        if "eval" in self.cfg and self.cfg["eval"]:
-            self.load()
 
     def recommend_from_action(self, action):
         """
@@ -125,6 +127,7 @@ class Recommender:
 
     def set_users(self, users_):
         self.env.set_users(users_)
+        self.reset()
         self.users = self.env.users
         self.num_users = self.env.num_users
         self.user_embeddings.fit(self.users)
@@ -292,7 +295,7 @@ class Recommender:
                 logger.info(f"Start episode #{episode}")
                 iter_count, episode_reward = self.train_on_episode(iter_count)
                 logger.info(f"Episode Reward: {episode_reward}")
-                mlflow.log_metric("episode_reward", episode_reward, step=iter_count)
+                mlflow.log_metric("episode_reward", episode_reward, step=episode)
                 if (episode + 1) % self.save_interval == 0:
                     self.save(f"ep_{episode+1}")
 
@@ -325,8 +328,11 @@ class Recommender:
 
     def load(self, subdir: Optional[Path] = None):
         actor_checkpoint = self.get_actor_checkpoint(subdir)
-        self.actor.load(actor_checkpoint)
+        # self.actor.load(actor_checkpoint)
+        self.actor = Actor.from_checkpoint(actor_checkpoint)
         critic_checkpoint = self.get_critic_checkpoint(subdir)
-        self.critic.load(critic_checkpoint)
+        # self.critic.load(critic_checkpoint)
+        self.critic = Critic.from_checkpoint(critic_checkpoint)
         drr_checkpoint = self.get_drr_checkpoint(subdir)
-        self.drr_ave.load(drr_checkpoint)
+        # self.drr_ave.load(drr_checkpoint)
+        self.drr_ave = DRRAve.from_checkpoint(drr_checkpoint)
