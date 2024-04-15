@@ -1,5 +1,5 @@
 eval: True
-input_data: data/ayampp_cleaned_split/train/
+input_data: data/ayampp_cleaned_split/test/
 device: cpu
 mlflow_port: 8088
 
