@@ -18,6 +18,7 @@ def main(
 ):
 
     users = pd.read_csv(input_folder / "users.csv")
+    orders = pd.read_csv(input_folder / "orders.csv")
     train_users, test_users = train_test_split(
         users, train_size=train_ratio, random_state=42
     )
@@ -31,13 +32,15 @@ def main(
 
     # copy to train folder
     (input_folder / "foods.csv").copy2(train_dir)
-    (input_folder / "orders.csv").copy2(train_dir)
+    train_orders = orders[orders.UserID.isin(train_users.UserID)]
     train_users.to_csv(train_dir / "users.csv", index=False)
+    train_orders.to_csv(train_dir / "orders.csv", index=False)
 
     # copy to test folder
     (input_folder / "foods.csv").copy2(test_dir)
-    (input_folder / "orders.csv").copy2(test_dir)
     test_users.to_csv(test_dir / "users.csv", index=False)
+    test_orders = orders[orders.UserID.isin(test_users.UserID)]
+    test_orders.to_csv(test_dir / "orders.csv", index=False)
 
 
 if __name__ == "__main__":
