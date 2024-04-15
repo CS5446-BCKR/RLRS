@@ -25,7 +25,7 @@ class ActorModel(nn.Module):
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, output_dim),
-            nn.Tanh(),
+            # nn.Tanh(),
         ]
         self.layers = nn.Sequential(*self.layers)
 
@@ -54,7 +54,8 @@ class Actor(nn.Module):
         self.step_size = step_size
         # hard code optimizer here
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(
+            self.optim, step_size=self.step_size)
 
     def update_target(self):
         """
