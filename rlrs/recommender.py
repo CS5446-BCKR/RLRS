@@ -269,9 +269,7 @@ class Recommender:
             # move to the next state
             prev_items = next_user_state.prev_pos_items
             episode_reward += next_user_state.reward
-        logger.info(f"Episode Reward: {episode_reward}")
-        mlflow.log_metric("episode_reward", episode_reward, step=iter_count)
-        return iter_count
+        return iter_count, episode_reward
 
     def train(self):
         # 1. Initialize networks
@@ -292,7 +290,9 @@ class Recommender:
             mlflow.log_params(self.cfg)
             for episode in range(self.M):
                 logger.info(f"Start episode #{episode}")
-                iter_count = self.train_on_episode(iter_count)
+                iter_count, episode_reward = self.train_on_episode(iter_count)
+                logger.info(f"Episode Reward: {episode_reward}")
+                mlflow.log_metric("episode_reward", episode_reward, step=iter_count)
                 if (episode + 1) % self.save_interval == 0:
                     self.save(f"ep_{episode+1}")
 
