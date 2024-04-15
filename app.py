@@ -57,8 +57,10 @@ def reset_env(user_id: str) -> Status:
 @app.get("/recommend")
 def recommend() -> List[str]:
     items = recommender.recommend()
-    items = items or []
-    items = list(map(str, items))
+    if items is None:
+        items = []
+    else:
+        items = list(map(str, items))
     return items
 
 
