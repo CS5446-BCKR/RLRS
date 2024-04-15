@@ -18,7 +18,9 @@ def main(
 ):
 
     users = pd.read_csv(input_folder / "users.csv")
-    train_users, test_users = train_test_split(users, train_size=train_ratio)
+    train_users, test_users = train_test_split(
+        users, train_size=train_ratio, random_state=42
+    )
 
     # output
     output_folder.makedirs_p()
