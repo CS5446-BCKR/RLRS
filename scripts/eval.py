@@ -27,7 +27,7 @@ def prepare_groundtruths(dataset: FoodSimple, state_size: int):
     return groundtruths
 
 def get_pretty_names(item_id_list, dataset: FoodSimple):
-    return dataset.foods[dataset.food.ItemID.isin(item_id_list)].name.tolist()
+    return dataset.foods[dataset.foods.index.isin(item_id_list)].name.tolist()
 
 def evaluate(recommender: Recommender, dataset: FoodSimple,  user, gts, top_k, verbal=False):
     """
@@ -83,10 +83,11 @@ def main(
     precs = []
     r1_at_k = []
 
+
     groundtruths = prepare_groundtruths(dataset, state_size)
 
     for user, gts in groundtruths.items():
-        precision, r1 = evaluate(recommender, user, gts, top_k=topk, verbal=verbose)
+        precision, r1 = evaluate(recommender, dataset , user, gts, top_k=topk, verbal=verbose)
         precs.append(precision)
         r1_at_k.append(r1)
 
