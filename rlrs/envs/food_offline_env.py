@@ -10,7 +10,7 @@ from .base import DEFAULT_DONE_COUNT, OfflineEnvBase, UserStateInfo
 Food Offline Env
 """
 POSITIVE_REWARD = 1.0
-NEGATIVE_REWARD = -0.1
+NEGATIVE_REWARD = -0.5
 
 
 class FoodOrderEnv(OfflineEnvBase):
@@ -34,7 +34,7 @@ class FoodOrderEnv(OfflineEnvBase):
 
         # historical positive items
         self.prev_positive_items = self.all_positive_items[: self.state_size]
-        self.positive_items = self.all_positive_items[self.state_size:]
+        self.positive_items = self.all_positive_items[self.state_size :]
         # assuming all previous items are recommended by the agent
         self.recommended_items = list(set(self.prev_positive_items))
         self.done = len(self.positive_items) == 0
@@ -72,11 +72,8 @@ class FoodOrderEnv(OfflineEnvBase):
         )
 
         n_rec_items = len(self.recommended_items)
-        if (
-            n_rec_items > self.done_count
-            or n_rec_items >= self.db.get_user_history_length(self.user)
-        ):
+        if n_rec_items > self.done_count:
             self.done = True
         return UserStateInfo(
-            self.user, self.prev_positive_items, self.done, np.mean(rewards)
+            self.user, self.prev_positive_items, self.done, np.sum(rewards)
         )
