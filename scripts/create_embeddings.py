@@ -1,6 +1,7 @@
 import json
 
 import h5py
+import numpy as np
 import typer
 from path import Path
 
@@ -38,6 +39,8 @@ def main(
     algo.fit(ratings)
     user_embeds = algo.user_matrix
     item_embeds = algo.item_matrix
+    user_embeds /= np.linalg.norm(user_embeds, axis=1, keepdims=True)
+    item_embeds /= np.linalg.norm(item_embeds, axis=1, keepdims=True)
 
     # save
     output_folder.makedirs_p()
