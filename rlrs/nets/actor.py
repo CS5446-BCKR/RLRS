@@ -54,8 +54,7 @@ class Actor(nn.Module):
         self.step_size = step_size
         # hard code optimizer here
         self.optim = Adam(self.online_network.parameters(), lr=self.lr)
-        self.scheduler = lr_scheduler.StepLR(
-            self.optim, step_size=self.step_size)
+        self.scheduler = lr_scheduler.StepLR(self.optim, step_size=self.step_size)
 
     def update_target(self):
         """
@@ -78,7 +77,7 @@ class Actor(nn.Module):
         self.online_network.train()
         self.optim.zero_grad()
         outputs = self.online_network(inputs)
-        outputs.backward(-state_grads, retain_graph=True)
+        outputs.backward(state_grads, retain_graph=True)
         self.optim.step()
         self.scheduler.step()
 
