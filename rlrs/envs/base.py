@@ -17,7 +17,7 @@ class OfflineEnvBase(ABC):
     ):
         self.db = db
         self.state_size = state_size
-        self.avail_users = avail_users or db.get_users_by_history(state_size)
+        self.avail_users = avail_users or db.get_users_by_history(state_size + 1)
         self.done_count = done_count
         self.state_size = state_size
         self.user = None
